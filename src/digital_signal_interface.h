@@ -53,11 +53,10 @@ void DigitalSignalInterface::messageBaudrate() {
     // make this fragment of code reusable
     TouchCoordinates TP;
 	int buttonClicked;
-    while(true) {
+    // while(true) {
 		bool selected = false;
 		while(!selected){
 			TP = getTouchCoords();
-			// printf("%d  %d   \n", TP.x, TP.y);
 			for (int i=0; i<= CONTINUE; i++) {
 				buttonClicked = buttons[i].checkCollision(TP);
 				if (buttonClicked != -1) {
@@ -66,14 +65,17 @@ void DigitalSignalInterface::messageBaudrate() {
 				}
 			}
 		}
-	}
+	// }
 
     switch(buttonClicked) {
         case CANCEL: {
-            
+            // no further loop -> goes back to mainMenu endless loop
+            puts("CANCEL");
+            break;
         }
         case CONTINUE: {
-
+            puts("CONTINUE");
+            break;
         }
     }
 }

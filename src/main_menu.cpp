@@ -16,13 +16,13 @@ enum buttonsEnum { UARTe, SPIe, I2Ce, ANALOGe };
 
 int mainMenu(void)
 {	
-	Button* menuButtons = new Button[4]; // remember to delete
-	showMenuGUI(menuButtons);
-
-	TouchCoordinates TP;
-	int buttonClicked;
-
 	while(true) {
+		Button* menuButtons = new Button[4]; // remember to delete
+		showMenuGUI(menuButtons);
+
+		TouchCoordinates TP;
+		int buttonClicked;
+
 		bool selected = false;
 		while(!selected){
 			TP = getTouchCoords();
@@ -54,11 +54,12 @@ void showMenuGUI(Button* menuButtons) {
 }
 
 void takeAction(int buttonClicked, Button* menuButtons) {
+	delete [] menuButtons;
 	switch(buttonClicked) {
 		case UARTe: {
 			DigitalSignalInterface* UARTInterface = new DigitalSignalInterface("UART", 200, 300000);
-			delete [] menuButtons;
 			UARTInterface->mainFlow();
+			mainMenu();
 			// puts("UART");
 			break;
 		}
