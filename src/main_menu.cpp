@@ -1,23 +1,14 @@
 
 extern "C" {
 	#include "main.h"
-	#include "LCD_Driver.h"
-	#include "LCD_Touch.h"
 	#include "LCD_GUI.h"
-	#include "LCD_Bmp.h"
-	#include "DEV_Config.h"
 	#include <stdio.h>
-	#include "hardware/watchdog.h"
 	#include "pico/stdlib.h"
 }
 #include "button.h"
 #include "touch_scan.h"
 #include "digital_signal_interface.h"
 
-
-extern LCD_DIS sLCD_DIS;
-
-void initLcdTp();
 void showMenuGUI(Button* menuButtons);
 void takeAction(int buttonClicked, Button* menuButtons);
 
@@ -25,8 +16,6 @@ enum buttonsEnum { UARTe, SPIe, I2Ce, ANALOGe };
 
 int mainMenu(void)
 {	
-	initLcdTp();
-
 	Button* menuButtons = new Button[4]; // remember to delete
 	showMenuGUI(menuButtons);
 
@@ -49,19 +38,6 @@ int mainMenu(void)
 	}
 
 	return 0;
-}
-
-void initLcdTp() {
-	System_Init();
-	// this scan direction doesnt matter whatsoever
-	LCD_SCAN_DIR  lcd_scan_dir = SCAN_DIR_DFT;
-	LCD_Init(lcd_scan_dir,800);
-	LCD_WriteReg(0x36);
-	LCD_WriteData(0x60);
-	sLCD_DIS.LCD_Dis_Column	= 320;
-	sLCD_DIS.LCD_Dis_Page =  240;
-	TP_Init(SCAN_DIR_DFT); 	// this lcd_scan_dir may fuck things up
-	TP_GetAdFac();			// this may also fuck things up
 }
 
 void showMenuGUI(Button* menuButtons) {

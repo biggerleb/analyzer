@@ -3,7 +3,9 @@
 
 #include <pico/stdlib.h>
 #include <stdio.h>
-#include "LCD_Touch.h"
+extern "C" {
+    #include "LCD_Touch.h"
+}
 
 extern TP_DEV sTP_DEV;
 
