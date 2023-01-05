@@ -12,13 +12,14 @@ extern "C" {
 }
 #include "button.h"
 #include "touch_scan.h"
+#include "digital_signal_interface.h"
 
 
 extern LCD_DIS sLCD_DIS;
 
 void initLcdTp();
 void showMenuGUI(Button* menuButtons);
-void takeAction(int buttonClicked);
+void takeAction(int buttonClicked, Button* menuButtons);
 
 enum buttonsEnum { UARTe, SPIe, I2Ce, ANALOGe };
 
@@ -36,7 +37,6 @@ int mainMenu(void)
 		bool selected = false;
 		while(!selected){
 			TP = getTouchCoords();
-			// printf("%d  %d   \n", TP.x, TP.y);
 			for (int i=0; i<= ANALOGe; i++) {
 				buttonClicked = menuButtons[i].checkCollision(TP);
 				if (buttonClicked != -1) {
@@ -45,7 +45,7 @@ int mainMenu(void)
 				}
 			}
 		}
-		takeAction(buttonClicked);
+		takeAction(buttonClicked, menuButtons);
 	}
 
 	return 0;
@@ -77,19 +77,26 @@ void showMenuGUI(Button* menuButtons) {
 	GUI_DisString_EN(200, 170, "Analog", &Font16, WHITE, BLACK);
 }
 
-void takeAction(int buttonClicked) {
+void takeAction(int buttonClicked, Button* menuButtons) {
 	switch(buttonClicked) {
-		case UARTe:
-			puts("UART");
+		case UARTe: {
+			DigitalSignalInterface* UARTInterface = new DigitalSignalInterface("UART", 200, 300000);
+			delete [] menuButtons;
+			UARTInterface->mainFlow();
+			// puts("UART");
 			break;
-		case SPIe:
+		}
+		case SPIe: {
 			puts("SPI");
 			break;
-		case I2Ce:
+		}
+		case I2Ce: {
 			puts("I2C");
 			break;
-		case ANALOGe:
+		}
+		case ANALOGe: {
 			puts("ANALOG");
 			break;
+		}
 	}
 }
