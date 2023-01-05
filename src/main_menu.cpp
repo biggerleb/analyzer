@@ -41,7 +41,7 @@ int mainMenu(void)
 				buttonClicked = menuButtons[i].checkCollision(TP);
 				if (buttonClicked != -1) {
 					selected = true;
-					puts("jooo");
+					break;
 				}
 			}
 		}
