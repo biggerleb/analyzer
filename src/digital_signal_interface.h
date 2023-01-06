@@ -52,23 +52,8 @@ void DigitalSignalInterface::messageBaudrate() {
     std::string max = "max: " + std::to_string(maxBaudrate);
     GUI_DisString_EN(115, 116, min.c_str(), &Font16, WHITE, BLACK);
     GUI_DisString_EN(115, 136, max.c_str(), &Font16, WHITE, BLACK);
-
-    // make this fragment of code reusable
-    TouchCoordinates TP;
-	int buttonClicked;
-    // while(true) {
-		bool selected = false;
-		while(!selected){
-			TP = getTouchCoords();
-			for (int i=0; i<= CONTINUE; i++) {
-				buttonClicked = buttons[i].checkCollision(TP);
-				if (buttonClicked != -1) {
-					selected = true;
-					break;
-				}
-			}
-		}
-	// }
+    
+    int buttonClicked = Button::lookForCollision(buttons, CONTINUE);
 
     switch(buttonClicked) {
         case CANCEL: {

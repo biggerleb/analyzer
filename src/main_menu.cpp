@@ -20,20 +20,7 @@ int mainMenu(void)
 		Button* menuButtons = new Button[4]; // remember to delete
 		showMenuGUI(menuButtons);
 
-		TouchCoordinates TP;
-		int buttonClicked;
-
-		bool selected = false;
-		while(!selected){
-			TP = getTouchCoords();
-			for (int i=0; i<= ANALOGe; i++) {
-				buttonClicked = menuButtons[i].checkCollision(TP);
-				if (buttonClicked != -1) {
-					selected = true;
-					break;
-				}
-			}
-		}
+		int buttonClicked = Button::lookForCollision(menuButtons, ANALOGe);
 		takeAction(buttonClicked, menuButtons);
 	}
 
