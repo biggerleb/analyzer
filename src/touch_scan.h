@@ -16,6 +16,7 @@ struct TouchCoordinates {
 
 TouchCoordinates getTouchCoords() {
     TouchCoordinates coords;
+    TP_Scan(0); // this solves the problem with getting last touch data
     TP_Scan(0);
 	uint16_t xCalibrated = 320 - ((sTP_DEV.Ypoint - 400) * 0.091428);
 	uint16_t yCalibrated = (sTP_DEV.Xpoint - 400) * 0.068571;

@@ -29,6 +29,7 @@ public:
             for (int i=0; i<= lastEnum; i++) {
                 buttonClicked = buttons[i].checkCollision(TP);
                 if (buttonClicked != -1) {
+                    printf("%d  %d", TP.x, TP.y);
                     return buttonClicked;
                 }
             }
