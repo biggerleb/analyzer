@@ -5,6 +5,7 @@
 #include "LCD_GUI.h"
 #include <string>
 #include "button.h"
+#include "figure_display.h"
 
 enum FlowEnum {MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE, FIGURE_INPUT_SIZE, DATA_BEING_COLLECTED};
 
@@ -14,11 +15,13 @@ private:
     int minBaudrate;
     int maxBaudrate;
     FlowEnum nextView;
-    
+    int baudrateSet;
+    int sizeSet;
+
     void message(std::string message);
     void messageBaudrate();
     void messageSize();
-    int figureInput();
+    void figureInput();
     void backToMainMenu();
     void waitingScreen();
     void dataList();
@@ -28,7 +31,8 @@ public:
     void mainFlow();
 
     DigitalSignalInterface(std::string name, int minBaudrate, int maxBaudrate):
-        name(name), minBaudrate(minBaudrate), maxBaudrate(maxBaudrate), nextView(MESSAGE_BAUDRATE) {}
+        name(name), minBaudrate(minBaudrate), maxBaudrate(maxBaudrate), nextView(MESSAGE_BAUDRATE),
+        baudrateSet(0), sizeSet(0) {}
 };
 
 void DigitalSignalInterface::mainFlow() {
@@ -44,6 +48,7 @@ void DigitalSignalInterface::mainFlow() {
                 figureInput();
                 break;
             case MESSAGE_SIZE:
+                // messageSize;
                 break;
             case FIGURE_INPUT_SIZE:
                 break;
@@ -76,7 +81,6 @@ void DigitalSignalInterface::messageBaudrate() {
     sleep_ms(400);
     int buttonClicked = Button::lookForCollision(buttons, CONTINUE);
 
-    puts("HALO KURWA");
     switch(buttonClicked) {
         case CANCEL: {
             puts("CANCEL");
@@ -92,7 +96,7 @@ void DigitalSignalInterface::messageBaudrate() {
     }
 }
 
-int DigitalSignalInterface::figureInput() {
+void DigitalSignalInterface::figureInput() {
     enum buttonEnums {CANCEL, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9, NUM_0, CLEAR, OK};
     Button* buttons = new Button[13]; // remember to delete
 
@@ -137,6 +141,8 @@ int DigitalSignalInterface::figureInput() {
     buttons[12] = (*new Button(192, 250, 186, 229, OCEAN_GREEN, OK));
     GUI_DisString_EN(205, 198, "OK", &Font24, WHITE, BLACK);
 
+    FigureDisplay figureDisplay = FigureDisplay();
+
     while(nextView == FIGURE_INPUT_BAUDRATE || nextView == FIGURE_INPUT_SIZE) {
         sleep_ms(400);
         int buttonClicked = Button::lookForCollision(buttons, OK);
@@ -147,44 +153,58 @@ int DigitalSignalInterface::figureInput() {
                 break;
             case NUM_1:
                 puts("NUM_1");
+                figureDisplay.writeDigit(1);
                 break;
             case NUM_2:
                 puts("NUM_2");
+                figureDisplay.writeDigit(2);
                 break;
             case NUM_3:
                 puts("NUM_3");
+                figureDisplay.writeDigit(3);
                 break;
             case NUM_4:
                 puts("NUM_4");
+                figureDisplay.writeDigit(4);
                 break;
             case NUM_5:
                 puts("NUM_5");
+                figureDisplay.writeDigit(5);
                 break;
             case NUM_6:
                 puts("NUM_6");
+                figureDisplay.writeDigit(6);
                 break;
             case NUM_7:
                 puts("NUM_7");
+                figureDisplay.writeDigit(7);
                 break;
             case NUM_8:
                 puts("NUM_8");
+                figureDisplay.writeDigit(8);
                 break;
             case NUM_9:
                 puts("NUM_9");
+                figureDisplay.writeDigit(9);
                 break;
             case NUM_0:
                 puts("NUM_0");
+                figureDisplay.writeDigit(0);
                 break;
             case CLEAR:
                 puts("CLEAR");
+                figureDisplay.clearFigure();
                 break;
             case OK:
                 puts("OK");
+                baudrateSet = figureDisplay.getFigure();
+                printf("%d \n", baudrateSet);
+                nextView = MESSAGE_BAUDRATE; // to change
                 break;
         }
     }
 
-    return 0;
+    delete [] buttons;
 }
 
 #endif
