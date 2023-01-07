@@ -14,14 +14,15 @@ private:
     std::string name;
     int minBaudrate;
     int maxBaudrate;
+    int minSize;
+    int maxSize;
     FlowEnum nextView;
     int baudrateSet;
     int sizeSet;
 
-    void message(std::string message);
     void messageBaudrate();
     void messageSize();
-    void figureInput();
+    int figureInput();
     void backToMainMenu();
     void waitingScreen();
     void dataList();
@@ -30,27 +31,43 @@ private:
 public:
     void mainFlow();
 
-    DigitalSignalInterface(std::string name, int minBaudrate, int maxBaudrate):
-        name(name), minBaudrate(minBaudrate), maxBaudrate(maxBaudrate), nextView(MESSAGE_BAUDRATE),
-        baudrateSet(0), sizeSet(0) {}
+    DigitalSignalInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
+        name(name), minBaudrate(minBaudrate), maxBaudrate(maxBaudrate), minSize(minSize), maxSize(maxSize),
+        nextView(MESSAGE_BAUDRATE), baudrateSet(0), sizeSet(0) {}
 };
 
 void DigitalSignalInterface::mainFlow() {
-    // enum flowEnum {MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE, FIGURE_INPUT_SIZE, DATA_BEING_COLLECTED};
-    // messageBaudrate();
     while (true) {
         if (nextView == MAIN_MENU) break;
+        int figure;
         switch (nextView) {
             case MESSAGE_BAUDRATE:
                 messageBaudrate();
                 break;
             case FIGURE_INPUT_BAUDRATE:
-                figureInput();
+                figure = figureInput();
+                if (figure != -1) {
+                    nextView = MESSAGE_SIZE;
+                    baudrateSet = figure;
+                    printf("baudrateSet: %d", baudrateSet);
+                }
+                else {
+                    nextView = MESSAGE_BAUDRATE;
+                }
                 break;
             case MESSAGE_SIZE:
-                // messageSize;
+                messageSize();
                 break;
             case FIGURE_INPUT_SIZE:
+                figure = figureInput();
+                if (figure != -1) {
+                    nextView = MAIN_MENU; // to change
+                    sizeSet = figure;
+                    printf("sizeSet: %d", sizeSet);
+                }
+                else {
+                    nextView = MESSAGE_SIZE;
+                }
                 break;
             case DATA_BEING_COLLECTED:
                 break;
@@ -90,13 +107,49 @@ void DigitalSignalInterface::messageBaudrate() {
         case CONTINUE: {
             puts("CONTINUE");
             nextView = FIGURE_INPUT_BAUDRATE;
-            // while(true); //TUTAJ
             break;
         }
     }
 }
 
-void DigitalSignalInterface::figureInput() {
+void DigitalSignalInterface::messageSize() {
+    enum buttonEnums {CANCEL, CONTINUE};
+    Button* buttons = new Button[2]; // remember to delete
+    
+    GUI_Clear(LAVENDER_WEB);
+
+    buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
+    GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
+    
+    buttons[1] = (* new Button(85, 235, 168, 203, OCEAN_GREEN, CONTINUE));
+    GUI_DisString_EN(116, 180, "CONTINUE", &Font16, WHITE, BLACK);
+
+    GUI_DisString_EN(22, 88, "Select number of bytes to receive", &Font16, WHITE, BLACK);
+    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
+
+    std::string min = "min: " + std::to_string(minSize);
+    std::string max = "max: " + std::to_string(maxSize);
+    GUI_DisString_EN(115, 116, min.c_str(), &Font16, WHITE, BLACK);
+    GUI_DisString_EN(115, 136, max.c_str(), &Font16, WHITE, BLACK);
+    
+    sleep_ms(400);
+    int buttonClicked = Button::lookForCollision(buttons, CONTINUE);
+
+    switch(buttonClicked) {
+        case CANCEL: {
+            puts("CANCEL");
+            nextView = MAIN_MENU;
+            break;
+        }
+        case CONTINUE: {
+            puts("CONTINUE");
+            nextView = FIGURE_INPUT_SIZE;
+            break;
+        }
+    }
+}
+
+int DigitalSignalInterface::figureInput() {
     enum buttonEnums {CANCEL, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9, NUM_0, CLEAR, OK};
     Button* buttons = new Button[13]; // remember to delete
 
@@ -149,7 +202,6 @@ void DigitalSignalInterface::figureInput() {
         switch (buttonClicked) {
             case CANCEL:
                 puts("CANCEL");
-                nextView = MESSAGE_BAUDRATE;
                 break;
             case NUM_1:
                 puts("NUM_1");
@@ -197,14 +249,13 @@ void DigitalSignalInterface::figureInput() {
                 break;
             case OK:
                 puts("OK");
-                baudrateSet = figureDisplay.getFigure();
-                printf("%d \n", baudrateSet);
-                nextView = MESSAGE_BAUDRATE; // to change
-                break;
+                delete [] buttons;
+                return figureDisplay.getFigure();
         }
     }
 
     delete [] buttons;
+    return -1;
 }
 
 #endif
