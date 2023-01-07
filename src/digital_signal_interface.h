@@ -124,7 +124,8 @@ void DigitalSignalInterface::messageSize() {
     buttons[1] = (* new Button(85, 235, 168, 203, OCEAN_GREEN, CONTINUE));
     GUI_DisString_EN(116, 180, "CONTINUE", &Font16, WHITE, BLACK);
 
-    GUI_DisString_EN(22, 88, "Select number of bytes to receive", &Font16, WHITE, BLACK);
+    GUI_DisString_EN(42, 68, "Select number of bytes", &Font16, WHITE, BLACK);
+    GUI_DisString_EN(105, 88, "to receive", &Font16, WHITE, BLACK);
     GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
 
     std::string min = "min: " + std::to_string(minSize);
@@ -202,6 +203,8 @@ int DigitalSignalInterface::figureInput() {
         switch (buttonClicked) {
             case CANCEL:
                 puts("CANCEL");
+                delete [] buttons;
+                return -1;
                 break;
             case NUM_1:
                 puts("NUM_1");
