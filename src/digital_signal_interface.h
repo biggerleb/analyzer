@@ -11,7 +11,7 @@ enum FlowEnum { MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE
                 UART_SELECT_PARITY, UART_SELECT_STOP_BITS};
 
 class DigitalSignalInterface {
-private:
+protected:
     std::string name;
     int minBaudrate;
     int maxBaudrate;
@@ -147,6 +147,8 @@ void DigitalSignalInterface::messageSize() {
             break;
         }
     }
+
+    delete [] buttons;
 }
 
 int DigitalSignalInterface::figureInput() {
