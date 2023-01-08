@@ -21,6 +21,7 @@ private:
     int baudrateSet;
     int sizeSet;
 
+    void messageTemplate(Button* buttons, int enumForCancel, int enumForContinue);
     void messageBaudrate();
     void messageSize();
     int figureInput();
@@ -76,18 +77,22 @@ void DigitalSignalInterface::mainFlow() {
     }
 }
 
+void DigitalSignalInterface::messageTemplate(Button* buttons, int enumForCancel, int enumForContinue) {
+    GUI_Clear(LAVENDER_WEB);
+    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
+
+    buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, enumForCancel));
+    GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
+    
+    buttons[1] = (* new Button(85, 235, 168, 203, OCEAN_GREEN, enumForContinue));
+    GUI_DisString_EN(116, 180, "CONTINUE", &Font16, WHITE, BLACK);
+}
+
 void DigitalSignalInterface::messageBaudrate() {
     enum buttonEnums {CANCEL, CONTINUE};
     Button* buttons = new Button[2]; // remember to delete
     
-    GUI_Clear(LAVENDER_WEB);
-    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
-
-    buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
-    GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
-    
-    buttons[1] = (* new Button(85, 235, 168, 203, OCEAN_GREEN, CONTINUE));
-    GUI_DisString_EN(116, 180, "CONTINUE", &Font16, WHITE, BLACK);
+    messageTemplate(buttons, CANCEL, CONTINUE);
 
     GUI_DisString_EN(22, 88, "Select baudrate in bits/s", &Font16, WHITE, BLACK);
 
@@ -117,17 +122,10 @@ void DigitalSignalInterface::messageSize() {
     enum buttonEnums {CANCEL, CONTINUE};
     Button* buttons = new Button[2]; // remember to delete
     
-    GUI_Clear(LAVENDER_WEB);
-
-    buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
-    GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
-    
-    buttons[1] = (* new Button(85, 235, 168, 203, OCEAN_GREEN, CONTINUE));
-    GUI_DisString_EN(116, 180, "CONTINUE", &Font16, WHITE, BLACK);
+    messageTemplate(buttons, CANCEL, CONTINUE);
 
     GUI_DisString_EN(42, 68, "Select number of bytes", &Font16, WHITE, BLACK);
     GUI_DisString_EN(105, 88, "to receive", &Font16, WHITE, BLACK);
-    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
 
     std::string min = "min: " + std::to_string(minSize);
     std::string max = "max: " + std::to_string(maxSize);
