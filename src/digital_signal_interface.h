@@ -7,7 +7,8 @@
 #include "button.h"
 #include "figure_display.h"
 
-enum FlowEnum {MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE, FIGURE_INPUT_SIZE, DATA_BEING_COLLECTED};
+enum FlowEnum { MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE, FIGURE_INPUT_SIZE, DATA_BEING_COLLECTED,
+                UART_SELECT_PARITY, UART_SELECT_STOP_BITS};
 
 class DigitalSignalInterface {
 private:
@@ -29,7 +30,7 @@ private:
 
     // virtual void dataVisualization()=0;
 public:
-    void mainFlow();
+    virtual void mainFlow();
 
     DigitalSignalInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
         name(name), minBaudrate(minBaudrate), maxBaudrate(maxBaudrate), minSize(minSize), maxSize(maxSize),
@@ -80,6 +81,7 @@ void DigitalSignalInterface::messageBaudrate() {
     Button* buttons = new Button[2]; // remember to delete
     
     GUI_Clear(LAVENDER_WEB);
+    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
 
     buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
     GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
@@ -88,7 +90,6 @@ void DigitalSignalInterface::messageBaudrate() {
     GUI_DisString_EN(116, 180, "CONTINUE", &Font16, WHITE, BLACK);
 
     GUI_DisString_EN(22, 88, "Select baudrate in bits/s", &Font16, WHITE, BLACK);
-    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
 
     std::string min = "min: " + std::to_string(minBaudrate);
     std::string max = "max: " + std::to_string(maxBaudrate);

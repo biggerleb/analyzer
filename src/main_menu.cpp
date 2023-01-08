@@ -7,7 +7,9 @@ extern "C" {
 }
 #include "button.h"
 #include "touch_scan.h"
-#include "digital_signal_interface.h"
+#include "uart_interface.h"
+#include "spi_interface.h"
+#include "i2c_interface.h"
 
 void showMenuGUI(Button* menuButtons);
 void takeAction(int buttonClicked, Button* menuButtons);
@@ -44,18 +46,20 @@ void takeAction(int buttonClicked, Button* menuButtons) {
 	delete [] menuButtons;
 	switch(buttonClicked) {
 		case UARTe: {
-			DigitalSignalInterface* UARTInterface = new DigitalSignalInterface("UART", 200, 300000, 1, 200);
-			UARTInterface->mainFlow();
+			// DigitalSignalInterface* UARTInterface = new DigitalSignalInterface("UART", 200, 300000, 1, 200);
+			UARTInterface* uartInterface = new UARTInterface("UART", 200, 300000, 1, 200);
+			uartInterface->mainFlow();
 			mainMenu();
-			// puts("UART");
 			break;
 		}
 		case SPIe: {
-			puts("SPI");
+			SPIInterface* spiInterface = new SPIInterface("SPI", 200, 300000, 1, 200);
+			spiInterface->mainFlow();
 			break;
 		}
 		case I2Ce: {
-			puts("I2C");
+			I2CInterface* i2cInterface = new I2CInterface("I2C", 200, 300000, 1, 200);
+			i2cInterface->mainFlow();
 			break;
 		}
 		case ANALOGe: {
