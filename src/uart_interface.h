@@ -1,41 +1,76 @@
 #ifndef __UART_INTERFACE_H
 #define __UART_INTERFACE_H
 
-#include "digital_signal_interface.h"
 #include <string>
+#include "digital_signal_interface.h"
+#include "single_select.h"
 
 class UARTInterface : public DigitalSignalInterface {
+private:
+    uart_parity_t parity;
+
 public:
     void selectParity();
     void mainFlow();
 
     UARTInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
-        DigitalSignalInterface(name, minBaudrate, maxBaudrate, minSize, maxSize) {}
+        DigitalSignalInterface(name, minBaudrate, maxBaudrate, minSize, maxSize), parity(UART_PARITY_NONE) {}
 };
 
 void UARTInterface::selectParity() {
-    enum buttonEnums {CANCEL, CONTINUE};
-    Button* buttons = new Button[2]; // remember to delete
+    enum buttonEnums {CANCEL, CONTINUE, SELECT_NONE, SELECT_EVEN, SELECT_ODD};
+    Button* buttons = new Button[5]; // remember to delete
 
     messageTemplate(buttons, CANCEL, CONTINUE);
 
-    sleep_ms(400);
-    int buttonClicked = Button::lookForCollision(buttons, CONTINUE);
+    SingleSelect** onlySelect = new SingleSelect*[3];
+    onlySelect[0] = new SingleSelect(109, 69, "NONE", SELECT_NONE);
+    onlySelect[0]->select();
+    onlySelect[1] = new SingleSelect(109, 101, "EVEN", SELECT_EVEN);
+    onlySelect[2] = new SingleSelect(109, 133, "ODD", SELECT_ODD);
 
-    switch(buttonClicked) {
-        case CANCEL: {
-            puts("CANCEL");
-            nextView = MAIN_MENU;
-            break;
-        }
-        case CONTINUE: {
-            puts("CONTINUE");
-            nextView = MAIN_MENU;
-            break;
+    buttons[2] = *onlySelect[0];
+    buttons[3] = *onlySelect[1];
+    buttons[4] = *onlySelect[2];
+
+    while(nextView != MAIN_MENU && nextView != MAIN_MENU) {
+        sleep_ms(400);
+        int buttonClicked = Button::lookForCollision(buttons, SELECT_ODD);
+
+        switch(buttonClicked) {
+            case CANCEL: {
+                puts("CANCEL");
+                nextView = MAIN_MENU;
+                break;
+            }
+            case CONTINUE: {
+                puts("CONTINUE");
+                nextView = MAIN_MENU;
+                break;
+            }
+            case SELECT_NONE:
+                puts("SELET_NONE");
+                if (parity != UART_PARITY_NONE) {
+                    SingleSelect::select(onlySelect, SELECT_NONE, 3);
+                    parity = UART_PARITY_NONE;
+                }
+                break;
+            case SELECT_EVEN:
+                puts("SELECT_EVEN");
+                if (parity != UART_PARITY_EVEN) {
+                    SingleSelect::select(onlySelect, SELECT_EVEN, 3);
+                    parity = UART_PARITY_EVEN;
+                }
+                break;
+            case SELECT_ODD:
+                puts("SELECT_ODD");
+                if (parity != UART_PARITY_ODD) {
+                    SingleSelect::select(onlySelect, SELECT_ODD, 3);
+                    parity = UART_PARITY_ODD;
+                }
+                break;
         }
     }
-
-
 }
 
 void UARTInterface::mainFlow() {
