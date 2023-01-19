@@ -8,13 +8,16 @@
 class UARTInterface : public DigitalSignalInterface {
 private:
     uart_parity_t parity;
+    uint stopBits;
 
 public:
     void selectParity();
+    void selectStopBits();
+    void dataReceiving();
     void mainFlow();
 
     UARTInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
-        DigitalSignalInterface(name, minBaudrate, maxBaudrate, minSize, maxSize), parity(UART_PARITY_NONE) {}
+        DigitalSignalInterface(name, minBaudrate, maxBaudrate, minSize, maxSize), parity(UART_PARITY_NONE), stopBits(1) {}
 };
 
 void UARTInterface::selectParity() {
@@ -22,6 +25,8 @@ void UARTInterface::selectParity() {
     Button* buttons = new Button[5]; // remember to delete
 
     messageTemplate(buttons, CANCEL, CONTINUE);
+
+    GUI_DisString_EN(65, 36, "Select parity type", &Font16, WHITE, OXFORD_BLUE);
 
     SingleSelect** onlySelect = new SingleSelect*[3];
     onlySelect[0] = new SingleSelect(109, 69, "NONE", SELECT_NONE);
@@ -33,7 +38,7 @@ void UARTInterface::selectParity() {
     buttons[3] = *onlySelect[1];
     buttons[4] = *onlySelect[2];
 
-    while(nextView != MAIN_MENU && nextView != MAIN_MENU) {
+    while(nextView != MAIN_MENU && nextView != UART_SELECT_STOP_BITS) {
         sleep_ms(400);
         int buttonClicked = Button::lookForCollision(buttons, SELECT_ODD);
 
@@ -45,7 +50,7 @@ void UARTInterface::selectParity() {
             }
             case CONTINUE: {
                 puts("CONTINUE");
-                nextView = MAIN_MENU;
+                nextView = UART_SELECT_STOP_BITS;
                 break;
             }
             case SELECT_NONE:
@@ -71,6 +76,57 @@ void UARTInterface::selectParity() {
                 break;
         }
     }
+    delete [] buttons;
+    delete [] onlySelect;
+}
+
+void UARTInterface::selectStopBits() {
+    enum buttonEnums {CANCEL, CONTINUE, STOP_BIT_1, STOP_BITS_2};
+    Button* buttons = new Button[4]; // remember to delete
+
+    messageTemplate(buttons, CANCEL, CONTINUE);
+
+    SingleSelect** onlySelect = new SingleSelect*[2];
+    onlySelect[0] = new SingleSelect(95, 69, "1 stop bit", STOP_BIT_1);
+    onlySelect[0]->select();
+    onlySelect[1] = new SingleSelect(95, 101, "2 stop bits", STOP_BITS_2);
+
+    buttons[2] = *onlySelect[0];
+    buttons[3] = *onlySelect[1];
+
+    while(nextView != MAIN_MENU && nextView != MAIN_MENU) {
+        sleep_ms(400);
+        int buttonClicked = Button::lookForCollision(buttons, STOP_BITS_2);
+
+        switch(buttonClicked) {
+            case CANCEL: {
+                puts("CANCEL");
+                nextView = MAIN_MENU;
+                break;
+            }
+            case CONTINUE: {
+                puts("CONTINUE");
+                nextView = MAIN_MENU;
+                break;
+            }
+            case STOP_BIT_1:
+                puts("STOP_BIT_1");
+                if (stopBits != 1) {
+                    SingleSelect::select(onlySelect, STOP_BIT_1, 2);
+                    stopBits = 1;
+                }
+                break;
+            case STOP_BITS_2:
+                puts("STOP_BITS_2");
+                if (stopBits != 2) {
+                    SingleSelect::select(onlySelect, STOP_BITS_2, 2);
+                    stopBits = 2;
+                }
+                break;
+        }
+    }
+    delete [] buttons;
+    delete [] onlySelect;
 }
 
 void UARTInterface::mainFlow() {
@@ -108,6 +164,9 @@ void UARTInterface::mainFlow() {
                 break;
             case UART_SELECT_PARITY:
                 selectParity();
+                break;
+            case UART_SELECT_STOP_BITS:
+                selectStopBits();
                 break;
             case DATA_BEING_COLLECTED:
                 break;
