@@ -35,6 +35,19 @@ public:
         }
     }
 
+    static int singleCheckForCollision(Button* buttons, int lastEnum) {
+        TouchCoordinates TP;
+        int buttonClicked;
+        TP = getTouchCoords();
+        for (int i=0; i<= lastEnum; i++) {
+            buttonClicked = buttons[i].checkCollision(TP);
+            if (buttonClicked != -1) {
+                return buttonClicked;
+            }
+        }
+        return -1;
+    }
+
     Button(uint16_t startX, uint16_t endX, uint16_t startY, uint16_t endY, uint16_t color, int id):
         startX(startX), endX(endX), startY(startY), endY(endY), color(color), id(id) {
             GUI_DrawRectangle(startX, startY, endX, endY, color, DRAW_FULL, DOT_PIXEL_DFT);

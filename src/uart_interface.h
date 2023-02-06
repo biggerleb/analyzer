@@ -4,6 +4,7 @@
 #include <string>
 #include "digital_signal_interface.h"
 #include "single_select.h"
+#include "uart_receiver.h"
 
 class UARTInterface : public DigitalSignalInterface {
 private:
@@ -94,7 +95,7 @@ void UARTInterface::selectStopBits() {
     buttons[2] = *onlySelect[0];
     buttons[3] = *onlySelect[1];
 
-    while(nextView != MAIN_MENU && nextView != MAIN_MENU) {
+    while(nextView != MAIN_MENU && nextView != DATA_BEING_COLLECTED) {
         sleep_ms(400);
         int buttonClicked = Button::lookForCollision(buttons, STOP_BITS_2);
 
@@ -106,7 +107,7 @@ void UARTInterface::selectStopBits() {
             }
             case CONTINUE: {
                 puts("CONTINUE");
-                nextView = MAIN_MENU;
+                nextView = DATA_BEING_COLLECTED;
                 break;
             }
             case STOP_BIT_1:
@@ -127,6 +128,46 @@ void UARTInterface::selectStopBits() {
     }
     delete [] buttons;
     delete [] onlySelect;
+}
+
+void UARTInterface::dataReceiving() {
+    enum buttonEnums {CANCEL};
+    Button* buttons = new Button[1];
+
+    GUI_Clear(LAVENDER_WEB);
+    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
+
+    buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
+    GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
+
+    GUI_DisString_EN(30, 110, "Data is being collected", &Font16, WHITE, OXFORD_BLUE);
+
+    UartReceiver uartReceiver(baudrateSet, sizeSet, parity, stopBits);
+    uartReceiver.init();
+
+    while(nextView != MAIN_MENU) {
+        sleep_ms(400);
+        int buttonClicked = -1;
+        while (buttonClicked == -1) {
+            buttonClicked = Button::singleCheckForCollision(buttons, CANCEL);
+            if (uartReceiver.isBufferFull()) {
+                puts("full");
+                uartReceiver.deInit();
+                nextView = MAIN_MENU; // tutaj zmien
+                break;
+            }
+        }
+        
+
+        switch(buttonClicked) {
+            case CANCEL: {
+                puts("CANCEL");
+                nextView = MAIN_MENU;
+                break;
+            }
+        }
+    }
+    delete [] buttons;
 }
 
 void UARTInterface::mainFlow() {
@@ -169,6 +210,7 @@ void UARTInterface::mainFlow() {
                 selectStopBits();
                 break;
             case DATA_BEING_COLLECTED:
+                dataReceiving();
                 break;
         }
     }
