@@ -10,6 +10,7 @@
 int g_charsRxed = 0;
 int g_bufferSize = 0;
 uint8_t* g_buffer;
+
 void onUartRx() {
     while (uart_is_readable(UART_ID)) {
         uint8_t ch = uart_getc(UART_ID);
@@ -54,10 +55,12 @@ public:
         return g_charsRxed >= g_bufferSize;
     }
 
+    uint8_t* getBuffer() {
+        return g_buffer;
+    }
+
     void deInit() {
         g_charsRxed = 0;
-        g_bufferSize = 0;
-        delete[] g_buffer;
 
         irq_remove_handler(UART0_IRQ, onUartRx);
         irq_set_enabled(UART0_IRQ, false);

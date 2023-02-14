@@ -35,11 +35,11 @@ public:
         }
     }
 
-    static int singleCheckForCollision(Button* buttons, int lastEnum) {
+    static int singleCheckForCollision(Button* buttons, int lastEnum, int startEnum = 0) {
         TouchCoordinates TP;
         int buttonClicked;
         TP = getTouchCoords();
-        for (int i=0; i<= lastEnum; i++) {
+        for (int i=startEnum; i<= lastEnum; i++) {
             buttonClicked = buttons[i].checkCollision(TP);
             if (buttonClicked != -1) {
                 return buttonClicked;

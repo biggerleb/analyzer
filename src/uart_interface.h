@@ -145,15 +145,16 @@ void UARTInterface::dataReceiving() {
     UartReceiver uartReceiver(baudrateSet, sizeSet, parity, stopBits);
     uartReceiver.init();
 
-    while(nextView != MAIN_MENU) {
+    while(nextView != MAIN_MENU && nextView != DATA_LIST) {
         sleep_ms(400);
         int buttonClicked = -1;
         while (buttonClicked == -1) {
             buttonClicked = Button::singleCheckForCollision(buttons, CANCEL);
             if (uartReceiver.isBufferFull()) {
                 puts("full");
+                dataBuffer = uartReceiver.getBuffer();
                 uartReceiver.deInit();
-                nextView = MAIN_MENU; // tutaj zmien
+                nextView = DATA_LIST; // tutaj zmien
                 break;
             }
         }
@@ -211,6 +212,9 @@ void UARTInterface::mainFlow() {
                 break;
             case DATA_BEING_COLLECTED:
                 dataReceiving();
+                break;
+            case DATA_LIST:
+                dataList();
                 break;
         }
     }

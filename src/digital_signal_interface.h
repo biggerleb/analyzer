@@ -4,11 +4,20 @@
 #include "pico/stdlib.h"
 #include "LCD_GUI.h"
 #include <string>
+#include <sstream>
 #include "button.h"
 #include "figure_display.h"
+ 
+#define LIST_X_START 67
+#define LIST_X_MARGIN 12
+#define LIST_EL_WIDTH 90
+#define LIST_EL_HEIGHT 28
+#define LIST_Y_START 14
+#define LIST_Y_MARGIN 3
+#define LIST_NUMBER_OF_EL 14
 
 enum FlowEnum { MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE, FIGURE_INPUT_SIZE, DATA_BEING_COLLECTED,
-                UART_SELECT_PARITY, UART_SELECT_STOP_BITS};
+                UART_SELECT_PARITY, UART_SELECT_STOP_BITS, DATA_LIST};
 
 class DigitalSignalInterface {
 protected:
@@ -20,6 +29,9 @@ protected:
     FlowEnum nextView;
     int baudrateSet;
     int sizeSet;
+    int listOffset;
+    uint8_t byteSelected;
+    uint8_t* dataBuffer;
 
     void messageTemplate(Button* buttons, int enumForCancel, int enumForContinue);
     void messageBaudrate();
@@ -35,7 +47,7 @@ public:
 
     DigitalSignalInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
         name(name), minBaudrate(minBaudrate), maxBaudrate(maxBaudrate), minSize(minSize), maxSize(maxSize),
-        nextView(MESSAGE_BAUDRATE), baudrateSet(0), sizeSet(0) {}
+        nextView(MESSAGE_BAUDRATE), baudrateSet(0), sizeSet(0), listOffset(0), byteSelected(0) {}
 };
 
 void DigitalSignalInterface::mainFlow() {
@@ -260,6 +272,77 @@ int DigitalSignalInterface::figureInput() {
 
     delete [] buttons;
     return -1;
+}
+
+void DigitalSignalInterface::dataList() {
+    GUI_Clear(LAVENDER_WEB);
+    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
+
+    enum controlButtonsEnum {CANCEL, PREVIOUS, NEXT};
+    Button* controlButtons = new Button[3];
+
+    controlButtons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
+    GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
+
+    if (listOffset > 0) {
+        controlButtons[1] = (*new Button(2, 42, 103, 143, OXFORD_BLUE, PREVIOUS));
+        GUI_DisString_EN(12, 117, "<-", &Font16, WHITE, WHITE);
+    }
+    if (sizeSet > (listOffset+1) * LIST_NUMBER_OF_EL) {
+        controlButtons[2] = (*new Button(278, 318, 103, 143, OXFORD_BLUE, NEXT));
+        GUI_DisString_EN(289, 117, "->", &Font16, WHITE, WHITE);
+    }
+
+    Button* listItems = new Button[sizeSet];
+    int xOffset = 0;
+    int yOffset = 0;
+    for(int columnIndex=0; columnIndex<2; columnIndex++) {
+        for(int rowIndex=0; rowIndex<7; rowIndex++) {
+            int index = listOffset * LIST_NUMBER_OF_EL + columnIndex*7 + rowIndex;
+            if (index >= sizeSet) break;
+            int startX = LIST_X_START + columnIndex * (LIST_X_MARGIN + LIST_EL_WIDTH);
+            int endX = startX + LIST_EL_WIDTH;
+            int startY = LIST_Y_START + rowIndex * (LIST_Y_MARGIN + LIST_EL_HEIGHT);
+            int endY = startY + LIST_EL_HEIGHT;
+
+            listItems[index] = (*new Button(startX, endX, startY, endY, SILK, index));
+            GUI_DisString_EN(startX+3, startY+9, (std::to_string(index+1)+":").c_str(), &Font16, WHITE, BLACK);
+            std::stringstream hexStringStream;
+            hexStringStream << "0x" << std::hex << int(dataBuffer[index]);
+            GUI_DisString_EN(startX+42, startY+9, hexStringStream.str().c_str(), &Font16, WHITE, BLACK);
+        }
+    }
+    
+    bool dataListReload = false;
+    sleep_ms(400);
+    while (nextView != MAIN_MENU && dataListReload == false) {
+        int controlButtonClicked = Button::singleCheckForCollision(controlButtons, NEXT);
+        switch (controlButtonClicked) {
+            case MAIN_MENU:
+                nextView = MAIN_MENU;
+                break;
+            case PREVIOUS:
+                listOffset -= 1;
+                nextView = DATA_LIST;
+                dataListReload = true;
+                break;
+            case NEXT:
+                listOffset += 1;
+                nextView = DATA_LIST;
+                dataListReload = true;
+                break;
+        }
+        int firstIndexOnScreen = listOffset * LIST_NUMBER_OF_EL;
+        int lastIndexOnScreen = (listOffset + 1) * LIST_NUMBER_OF_EL - 1;
+        int listElementClicked = Button::singleCheckForCollision(listItems, lastIndexOnScreen, firstIndexOnScreen);
+        if (listElementClicked != -1) {
+            printf("list index: %d    value clicked: %d \n", listElementClicked, dataBuffer[listElementClicked]);
+            byteSelected = dataBuffer[listElementClicked];
+        }
+    }
+
+    delete[] controlButtons;
+    delete[] listItems;
 }
 
 #endif
