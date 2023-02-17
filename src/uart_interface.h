@@ -5,6 +5,7 @@
 #include "digital_signal_interface.h"
 #include "single_select.h"
 #include "uart_receiver.h"
+#include "digital_signal_plot.h"
 
 class UARTInterface : public DigitalSignalInterface {
 private:
@@ -15,7 +16,10 @@ public:
     void selectParity();
     void selectStopBits();
     void dataReceiving();
+    void dataPresentation();
     void mainFlow();
+
+    bool calculateParityBit(bool* bitsFromByte);
 
     UARTInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
         DigitalSignalInterface(name, minBaudrate, maxBaudrate, minSize, maxSize), parity(UART_PARITY_NONE), stopBits(1) {}
@@ -23,7 +27,7 @@ public:
 
 void UARTInterface::selectParity() {
     enum buttonEnums {CANCEL, CONTINUE, SELECT_NONE, SELECT_EVEN, SELECT_ODD};
-    Button* buttons = new Button[5]; // remember to delete
+    Button* buttons = new Button[5];
 
     messageTemplate(buttons, CANCEL, CONTINUE);
 
@@ -145,8 +149,8 @@ void UARTInterface::dataReceiving() {
     UartReceiver uartReceiver(baudrateSet, sizeSet, parity, stopBits);
     uartReceiver.init();
 
+    sleep_ms(400);
     while(nextView != MAIN_MENU && nextView != DATA_LIST) {
-        sleep_ms(400);
         int buttonClicked = -1;
         while (buttonClicked == -1) {
             buttonClicked = Button::singleCheckForCollision(buttons, CANCEL);
@@ -154,12 +158,10 @@ void UARTInterface::dataReceiving() {
                 puts("full");
                 dataBuffer = uartReceiver.getBuffer();
                 uartReceiver.deInit();
-                nextView = DATA_LIST; // tutaj zmien
+                nextView = DATA_LIST;
                 break;
             }
         }
-        
-
         switch(buttonClicked) {
             case CANCEL: {
                 puts("CANCEL");
@@ -169,6 +171,67 @@ void UARTInterface::dataReceiving() {
         }
     }
     delete [] buttons;
+}
+
+void UARTInterface::dataPresentation() {
+    enum buttonEnums {CANCEL};
+    Button* buttons = new Button[1];
+
+    GUI_Clear(LAVENDER_WEB);
+    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
+
+    buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
+    GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
+    
+    int numberOfBits = 1 + 8 + stopBits;
+    if (parity != UART_PARITY_NONE) numberOfBits += 1;
+    DigitalSignalPlot plot(100, 1, numberOfBits, 45);
+    bool* bitsFromByte = byteToBits(byteSelected);
+
+    std::stringstream ss;
+    ss << "UART Tx " << "[" << byteToHexString(byteSelected) << "]";
+    GUI_DisString_EN(85, 75, ss.str().c_str(), &Font16, WHITE, BLACK);
+
+    GUI_DisString_EN(20, 162, "start bit", &Font12, WHITE, PLOT_PINK);
+    GUI_DisString_EN(90, 162, "data bits", &Font12, WHITE, PLOT_BLUE);
+    if (parity != UART_PARITY_NONE) GUI_DisString_EN(162, 162, "parity bit", &Font12, WHITE, PLOT_ORANGE);
+    GUI_DisString_EN(242, 162, (stopBits == 1) ? "stop bit" : "stop bits", &Font12, WHITE, PLOT_RED);
+
+
+    // start bit
+    plot.drawNextBit(0, PLOT_PINK);
+    // data bits
+    for (int i=7; i>=0; i--) {
+        plot.drawNextBit(bitsFromByte[i], PLOT_BLUE);
+    }
+    // parity bit
+    if (parity != UART_PARITY_NONE) plot.drawNextBit(calculateParityBit(bitsFromByte), PLOT_ORANGE);
+    // stop bits
+    for(int i=0; i<stopBits; i++) {
+        plot.drawNextBit(1, PLOT_RED);
+    }
+    plot.toIdleState();
+
+    while(nextView != DATA_LIST) {
+        int buttonClicked = Button::lookForCollision(buttons, CANCEL);
+        if (buttonClicked == CANCEL) nextView = DATA_LIST;
+    }
+
+    delete[] buttons;
+    delete[] bitsFromByte;
+}
+
+bool UARTInterface::calculateParityBit(bool* bitsFromByte) {
+    int sum = 0;
+    for(int i=0; i<8; i++) {
+        sum += bitsFromByte[i];
+    }
+    if (parity == UART_PARITY_EVEN) {
+        return (sum % 2 == 0) ? 1 : 0;
+    } else if (parity == UART_PARITY_ODD) {
+        return (sum % 2 == 1) ? 1: 0;
+    }
+    return false; // should never occur
 }
 
 void UARTInterface::mainFlow() {
@@ -196,7 +259,7 @@ void UARTInterface::mainFlow() {
             case FIGURE_INPUT_SIZE:
                 figure = figureInput();
                 if (figure != -1) {
-                    nextView = UART_SELECT_PARITY; // to change
+                    nextView = UART_SELECT_PARITY;
                     sizeSet = figure;
                     printf("sizeSet: %d", sizeSet);
                 }
@@ -215,6 +278,9 @@ void UARTInterface::mainFlow() {
                 break;
             case DATA_LIST:
                 dataList();
+                break;
+            case UART_BYTE_PRESENTATION:
+                dataPresentation();
                 break;
         }
     }

@@ -17,7 +17,7 @@
 #define LIST_NUMBER_OF_EL 14
 
 enum FlowEnum { MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE, FIGURE_INPUT_SIZE, DATA_BEING_COLLECTED,
-                UART_SELECT_PARITY, UART_SELECT_STOP_BITS, DATA_LIST};
+                UART_SELECT_PARITY, UART_SELECT_STOP_BITS, DATA_LIST, UART_BYTE_PRESENTATION};
 
 class DigitalSignalInterface {
 protected:
@@ -40,6 +40,9 @@ protected:
     void backToMainMenu();
     void waitingScreen();
     void dataList();
+
+    bool* byteToBits(uint8_t byte); // remember to delete when done working with
+    std::string byteToHexString(uint8_t byte);
 
     // virtual void dataVisualization()=0;
 public:
@@ -307,15 +310,13 @@ void DigitalSignalInterface::dataList() {
 
             listItems[index] = (*new Button(startX, endX, startY, endY, SILK, index));
             GUI_DisString_EN(startX+3, startY+9, (std::to_string(index+1)+":").c_str(), &Font16, WHITE, BLACK);
-            std::stringstream hexStringStream;
-            hexStringStream << "0x" << std::hex << int(dataBuffer[index]);
-            GUI_DisString_EN(startX+42, startY+9, hexStringStream.str().c_str(), &Font16, WHITE, BLACK);
+            GUI_DisString_EN(startX+42, startY+9, byteToHexString(dataBuffer[index]).c_str(), &Font16, WHITE, BLACK);
         }
     }
     
     bool dataListReload = false;
     sleep_ms(400);
-    while (nextView != MAIN_MENU && dataListReload == false) {
+    while (nextView != MAIN_MENU && nextView != UART_BYTE_PRESENTATION && dataListReload == false) {
         int controlButtonClicked = Button::singleCheckForCollision(controlButtons, NEXT);
         switch (controlButtonClicked) {
             case MAIN_MENU:
@@ -336,13 +337,28 @@ void DigitalSignalInterface::dataList() {
         int lastIndexOnScreen = (listOffset + 1) * LIST_NUMBER_OF_EL - 1;
         int listElementClicked = Button::singleCheckForCollision(listItems, lastIndexOnScreen, firstIndexOnScreen);
         if (listElementClicked != -1) {
-            printf("list index: %d    value clicked: %d \n", listElementClicked, dataBuffer[listElementClicked]);
             byteSelected = dataBuffer[listElementClicked];
+            nextView = UART_BYTE_PRESENTATION;
         }
     }
 
     delete[] controlButtons;
     delete[] listItems;
+}
+
+bool* DigitalSignalInterface::byteToBits(uint8_t byte) {
+    bool* bitArray = new bool[8];
+    for (int i=0; i<8; i++) {
+        bitArray[i] = (byte >> i) % 2;
+    }
+    return bitArray;
+}
+
+std::string DigitalSignalInterface::byteToHexString(uint8_t byte) {
+    std::stringstream hexStringStream;
+    std::string additionalZero = (byte <= 0x0f) ? "0" : "";
+    hexStringStream << "0x" << additionalZero << std::hex << int(byte);
+    return hexStringStream.str();
 }
 
 #endif
