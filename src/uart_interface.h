@@ -22,7 +22,7 @@ public:
     bool calculateParityBit(bool* bitsFromByte);
 
     UARTInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
-        DigitalSignalInterface(name, minBaudrate, maxBaudrate, minSize, maxSize), parity(UART_PARITY_NONE), stopBits(1) {}
+        DigitalSignalInterface(name, minBaudrate, maxBaudrate, minSize, maxSize, MESSAGE_BAUDRATE), parity(UART_PARITY_NONE), stopBits(1) {}
 };
 
 void UARTInterface::selectParity() {
@@ -236,7 +236,10 @@ bool UARTInterface::calculateParityBit(bool* bitsFromByte) {
 
 void UARTInterface::mainFlow() {
     while (true) {
-        if (nextView == MAIN_MENU) break;
+        if (nextView == MAIN_MENU) {
+            clearGlobalBuffer();
+            break;
+        }
         int figure;
         switch (nextView) {
             case MESSAGE_BAUDRATE:

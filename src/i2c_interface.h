@@ -7,7 +7,7 @@
 class I2CInterface : public DigitalSignalInterface {
 public:
     I2CInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
-        DigitalSignalInterface(name, minBaudrate, maxBaudrate, minSize, maxSize) {}
+        DigitalSignalInterface(name, minBaudrate, maxBaudrate, minSize, maxSize, MESSAGE_SIZE) {}
 };
 
 #endif

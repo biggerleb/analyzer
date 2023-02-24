@@ -53,7 +53,7 @@ void takeAction(int buttonClicked, Button* menuButtons) {
 			break;
 		}
 		case SPIe: {
-			SPIInterface* spiInterface = new SPIInterface("SPI", 200, 300000, 1, 200);
+			SPIInterface* spiInterface = new SPIInterface("SPI", 200, 11000000, 1, 200);
 			spiInterface->mainFlow();
 			break;
 		}

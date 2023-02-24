@@ -1,15 +1,12 @@
 #ifndef __UART_RECEIVER_H
 #define __UART_RECEIVER_H
 
+#include "global_buffer.h"
+
 #define UART_ID uart0
 #define UART_TX_PIN 0
 #define UART_RX_PIN 1
 #define DATA_BITS 8
-
-// Need to make those global
-int g_charsRxed = 0;
-int g_bufferSize = 0;
-uint8_t* g_buffer;
 
 void onUartRx() {
     while (uart_is_readable(UART_ID)) {
@@ -60,7 +57,7 @@ public:
     }
 
     void deInit() {
-        g_charsRxed = 0;
+        // g_charsRxed = 0;
 
         irq_remove_handler(UART0_IRQ, onUartRx);
         irq_set_enabled(UART0_IRQ, false);

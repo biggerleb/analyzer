@@ -7,6 +7,7 @@
 #include <sstream>
 #include "button.h"
 #include "figure_display.h"
+#include "global_buffer.h"
  
 #define LIST_X_START 67
 #define LIST_X_MARGIN 12
@@ -17,7 +18,7 @@
 #define LIST_NUMBER_OF_EL 14
 
 enum FlowEnum { MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE, FIGURE_INPUT_SIZE, DATA_BEING_COLLECTED,
-                UART_SELECT_PARITY, UART_SELECT_STOP_BITS, DATA_LIST, UART_BYTE_PRESENTATION};
+                UART_SELECT_PARITY, UART_SELECT_STOP_BITS, DATA_LIST, UART_BYTE_PRESENTATION, SPI_SELECT_FORMAT};
 
 class DigitalSignalInterface {
 protected:
@@ -40,6 +41,7 @@ protected:
     void backToMainMenu();
     void waitingScreen();
     void dataList();
+    // virtual void dataReceiving();
 
     bool* byteToBits(uint8_t byte); // remember to delete when done working with
     std::string byteToHexString(uint8_t byte);
@@ -48,9 +50,9 @@ protected:
 public:
     virtual void mainFlow();
 
-    DigitalSignalInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
+    DigitalSignalInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize, FlowEnum firstView):
         name(name), minBaudrate(minBaudrate), maxBaudrate(maxBaudrate), minSize(minSize), maxSize(maxSize),
-        nextView(MESSAGE_BAUDRATE), baudrateSet(0), sizeSet(0), listOffset(0), byteSelected(0) {}
+        nextView(firstView), baudrateSet(0), sizeSet(0), listOffset(0), byteSelected(0) {}
 };
 
 void DigitalSignalInterface::mainFlow() {
@@ -321,6 +323,7 @@ void DigitalSignalInterface::dataList() {
         switch (controlButtonClicked) {
             case MAIN_MENU:
                 nextView = MAIN_MENU;
+                clearGlobalBuffer();
                 break;
             case PREVIOUS:
                 listOffset -= 1;
