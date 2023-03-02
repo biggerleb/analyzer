@@ -115,13 +115,12 @@ void SPIInterface::dataReceiving() {
         int buttonClicked = -1;
         while (buttonClicked == -1) {
             buttonClicked = Button::singleCheckForCollision(buttons, CANCEL);
-            // if (uartReceiver.isBufferFull()) {
-            //     puts("full");
-            //     dataBuffer = uartReceiver.getBuffer();
-            //     uartReceiver.deInit();
-            //     nextView = DATA_LIST;
-            //     break;
-            // }
+            if (spiReceiver.isBufferFull()) {
+                dataBuffer = spiReceiver.getBuffer();
+                spiReceiver.deInit();
+                nextView = DATA_LIST;
+                break;
+            }
         }
         switch(buttonClicked) {
             case CANCEL: {
@@ -161,6 +160,9 @@ void SPIInterface::mainFlow() {
                 break;
             case SPI_SELECT_FORMAT:
                 selectFormat();
+                break;
+            case DATA_LIST:
+                dataList();
                 break;
         }
     }
