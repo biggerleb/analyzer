@@ -236,10 +236,7 @@ bool UARTInterface::calculateParityBit(bool* bitsFromByte) {
 
 void UARTInterface::mainFlow() {
     while (true) {
-        if (nextView == MAIN_MENU) {
-            clearGlobalBuffer();
-            break;
-        }
+        if (nextView == MAIN_MENU) break;
         int figure;
         switch (nextView) {
             case MESSAGE_BAUDRATE:

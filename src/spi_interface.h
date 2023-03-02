@@ -135,10 +135,7 @@ void SPIInterface::dataReceiving() {
 
 void SPIInterface::mainFlow() {
     while (true) {
-        if (nextView == MAIN_MENU) {
-            clearGlobalBuffer();
-            break;
-        }
+        if (nextView == MAIN_MENU) break;
         int figure;
         switch (nextView) {
             case MESSAGE_SIZE:
