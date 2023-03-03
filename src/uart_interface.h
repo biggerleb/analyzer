@@ -201,7 +201,7 @@ void UARTInterface::dataPresentation() {
     // start bit
     plot.drawNextBit(0, PLOT_PINK);
     // data bits
-    for (int i=7; i>=0; i--) {
+    for (int i=0; i<8; i++) {
         plot.drawNextBit(bitsFromByte[i], PLOT_BLUE);
     }
     // parity bit
