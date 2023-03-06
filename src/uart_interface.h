@@ -279,7 +279,7 @@ void UARTInterface::mainFlow() {
             case DATA_LIST:
                 dataList();
                 break;
-            case UART_BYTE_PRESENTATION:
+            case BYTE_PRESENTATION:
                 dataPresentation();
                 break;
         }

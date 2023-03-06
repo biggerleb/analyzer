@@ -18,7 +18,7 @@
 #define LIST_NUMBER_OF_EL 14
 
 enum FlowEnum { MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE, FIGURE_INPUT_SIZE, DATA_BEING_COLLECTED,
-                UART_SELECT_PARITY, UART_SELECT_STOP_BITS, DATA_LIST, UART_BYTE_PRESENTATION, SPI_SELECT_FORMAT};
+                UART_SELECT_PARITY, UART_SELECT_STOP_BITS, DATA_LIST, BYTE_PRESENTATION, SPI_SELECT_FORMAT};
 
 class DigitalSignalInterface {
 protected:
@@ -46,7 +46,7 @@ protected:
     bool* byteToBits(uint8_t byte); // remember to delete when done working with
     std::string byteToHexString(uint8_t byte);
 
-    // virtual void dataVisualization()=0;
+    // virtual void dataPresentation()=0;
 public:
     virtual void mainFlow();
 
@@ -318,7 +318,7 @@ void DigitalSignalInterface::dataList() {
     
     bool dataListReload = false;
     sleep_ms(400);
-    while (nextView != MAIN_MENU && nextView != UART_BYTE_PRESENTATION && dataListReload == false) {
+    while (nextView != MAIN_MENU && nextView != BYTE_PRESENTATION && dataListReload == false) {
         int controlButtonClicked = Button::singleCheckForCollision(controlButtons, NEXT);
         switch (controlButtonClicked) {
             case MAIN_MENU:
@@ -341,7 +341,7 @@ void DigitalSignalInterface::dataList() {
         int listElementClicked = Button::singleCheckForCollision(listItems, lastIndexOnScreen, firstIndexOnScreen);
         if (listElementClicked != -1) {
             byteSelected = dataBuffer[listElementClicked];
-            nextView = UART_BYTE_PRESENTATION;
+            nextView = BYTE_PRESENTATION;
         }
     }
 

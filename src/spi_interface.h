@@ -13,6 +13,11 @@ private:
 
     void selectFormat();
     void dataReceiving();
+    void dataPresentation();
+
+    void plotSCLK();
+    void plotMOSI();
+    void plotCS();
 public:
     void mainFlow();
 
@@ -133,6 +138,76 @@ void SPIInterface::dataReceiving() {
     delete [] buttons;
 }
 
+void SPIInterface::dataPresentation() {
+    enum buttonEnums {CANCEL};
+    Button* buttons = new Button[1];
+
+    GUI_Clear(LAVENDER_WEB);
+    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
+
+    buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
+    GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
+
+    plotSCLK();
+    plotMOSI();
+    plotCS();
+
+    while(nextView != DATA_LIST) {
+        int buttonClicked = Button::lookForCollision(buttons, CANCEL);
+        if (buttonClicked == CANCEL) nextView = DATA_LIST;
+    }
+
+    delete[] buttons;
+    // delete[] bitsFromByte;
+}
+
+void SPIInterface::plotSCLK() {
+    DigitalSignalPlot plotSCLK(67, CPOL, 18, 32, PLOT_RED);
+    plotSCLK.drawNextBit(CPOL, PLOT_RED);
+    if (CPHA == 0) plotSCLK.drawNextBit(CPOL, PLOT_RED);
+    for (int i=0; i<15; i++) {
+        if (CPHA == 0) {
+            if (i%2) {
+                GUI_DrawLine(plotSCLK.pointerX+1, 67, plotSCLK.pointerX+1, 150, PLOT_GREEN, LINE_SOLID, DOT_PIXEL_1X1);
+            } else {
+                GUI_DrawLine(plotSCLK.pointerX+1, 67, plotSCLK.pointerX+1, 150, PLOT_ORANGE, LINE_SOLID, DOT_PIXEL_1X1);
+            }
+        } else {
+            if (i%2) {
+                GUI_DrawLine(plotSCLK.pointerX+1, 67, plotSCLK.pointerX+1, 150, PLOT_ORANGE, LINE_SOLID, DOT_PIXEL_1X1);
+            } else {
+                GUI_DrawLine(plotSCLK.pointerX+1, 67, plotSCLK.pointerX+1, 150, PLOT_GREEN, LINE_SOLID, DOT_PIXEL_1X1);
+            }
+        }
+        plotSCLK.drawNextBit(!plotSCLK.lastBitState, PLOT_RED);
+    }
+    if (CPHA == 0) {
+        GUI_DrawLine(plotSCLK.pointerX+1, 67, plotSCLK.pointerX+1, 150, PLOT_GREEN, LINE_SOLID, DOT_PIXEL_1X1);
+    } else {
+        GUI_DrawLine(plotSCLK.pointerX+1, 67, plotSCLK.pointerX+1, 150, PLOT_ORANGE, LINE_SOLID, DOT_PIXEL_1X1);
+    }
+    if (CPHA != 0) plotSCLK.drawNextBit(CPOL, PLOT_RED);
+    plotSCLK.drawNextBit(CPOL, PLOT_RED);
+    plotSCLK.toIdleState();
+}
+
+void SPIInterface::plotMOSI() {
+    DigitalSignalPlot plotMOSI(120, 0, 8, 32, 32, PLOT_BLUE); // divide to 18 parts, so its easier to plot in relation to SCLK
+    bool* bitsFromByte = byteToBits(byteSelected);
+    for (int i=7; i>=0; i--) {
+        plotMOSI.drawNextBit(bitsFromByte[i], PLOT_BLUE);
+    }
+    plotMOSI.toIdleState();
+}
+
+void SPIInterface::plotCS() {
+    DigitalSignalPlot plotCS(180, 1, 18, 32, PLOT_DARK_PINK);
+    for(int i=0; i<18; i++) {
+        plotCS.drawNextBit(0, PLOT_DARK_PINK);
+    }
+    plotCS.toIdleState();
+}
+
 void SPIInterface::mainFlow() {
     while (true) {
         if (nextView == MAIN_MENU) break;
@@ -160,6 +235,9 @@ void SPIInterface::mainFlow() {
                 break;
             case DATA_LIST:
                 dataList();
+                break;
+            case BYTE_PRESENTATION:
+                dataPresentation();
                 break;
         }
     }

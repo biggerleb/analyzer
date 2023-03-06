@@ -8,26 +8,39 @@ private:
     int numberOfBits;
     int plotHeight;
     int bitWidth;
-
-    bool lastBitState;
-    int pointerX;
-    int pointerY;
+    int idleWidth;
+    uint16_t idleColor;
 
     void drawMesh();
 public:
+    int pointerX;
+    int pointerY;
+    bool lastBitState;
     void drawNextBit(bool bitState, uint16_t color);
     void toIdleState();
     
-    DigitalSignalPlot(int startY, bool idleState, int numberOfBits, int plotHeight): 
-                        startY(startY), idleState(idleState), numberOfBits(numberOfBits), plotHeight(plotHeight) {
+    DigitalSignalPlot(int startY, bool idleState, int numberOfBits, int plotHeight, uint16_t idleColor = BLACK): 
+                startY(startY), idleState(idleState), numberOfBits(numberOfBits), plotHeight(plotHeight), idleColor(idleColor) {
         bitWidth = 300 / numberOfBits;
         lastBitState = idleState;
         pointerX = 5;
-        pointerY = (idleState == 1) ? startY : startY - plotHeight;
-        GUI_DrawLine(pointerX, pointerY, pointerX+5, pointerY, BLACK, LINE_SOLID, DOT_PIXEL_2X2);
-        pointerX += 5;
+        pointerY = (idleState == 1) ? startY : startY + plotHeight;
+        idleWidth = 5 + (300 - bitWidth*numberOfBits)/2;
+        GUI_DrawLine(pointerX, pointerY, pointerX+idleWidth, pointerY, idleColor, LINE_SOLID, DOT_PIXEL_2X2);
+        pointerX += idleWidth;
         drawMesh();
     }
+
+    DigitalSignalPlot(int startY, bool idleState, int numberOfBits, int plotHeight, int bitWidth, uint16_t idleColor):
+                startY(startY), idleState(idleState), numberOfBits(numberOfBits), plotHeight(plotHeight), idleColor(idleColor), bitWidth(bitWidth) {
+        lastBitState = idleState;
+        pointerX = 5;
+        pointerY = (idleState == 1) ? startY : startY + plotHeight;
+        idleWidth = 5 + (300 - bitWidth*numberOfBits)/2;
+        GUI_DrawLine(pointerX, pointerY, pointerX+idleWidth, pointerY, idleColor, LINE_SOLID, DOT_PIXEL_2X2);
+        pointerX += idleWidth;
+        drawMesh();
+        }
 };
 
 void DigitalSignalPlot::drawNextBit(bool bitState, uint16_t color) {
@@ -46,20 +59,20 @@ void DigitalSignalPlot::drawNextBit(bool bitState, uint16_t color) {
 
 void DigitalSignalPlot::toIdleState() {
     if (lastBitState == idleState) {
-        GUI_DrawLine(pointerX, pointerY, pointerX + 5, pointerY, BLACK, LINE_SOLID, DOT_PIXEL_2X2);
-        pointerX += 5; // although nothing new should be drawn
+        GUI_DrawLine(pointerX, pointerY, pointerX + idleWidth, pointerY, idleColor, LINE_SOLID, DOT_PIXEL_2X2);
+        pointerX += idleWidth; // although nothing new should be drawn
     } else {
-        int offsetY = lastBitState ? (-plotHeight) : plotHeight;
-        GUI_DrawLine(pointerX, pointerY, pointerX, pointerY + offsetY, BLACK, LINE_SOLID, DOT_PIXEL_2X2);
+        int offsetY = lastBitState ? plotHeight : (-plotHeight);
+        GUI_DrawLine(pointerX, pointerY, pointerX, pointerY + offsetY, idleColor, LINE_SOLID, DOT_PIXEL_2X2);
         pointerY += offsetY;
-        GUI_DrawLine(pointerX, pointerY, pointerX + 5, pointerY, BLACK, LINE_SOLID, DOT_PIXEL_2X2);
-        pointerX += 5; // although nothing new should be drawn
+        GUI_DrawLine(pointerX, pointerY, pointerX + idleWidth, pointerY, idleColor, LINE_SOLID, DOT_PIXEL_2X2);
+        pointerX += idleWidth; // although nothing new should be drawn
     }
 }
 
 void DigitalSignalPlot::drawMesh() {
     for (int i=0; i<numberOfBits; i++) {
-        GUI_DrawRectangle(10 + i*bitWidth, startY, 10 + (i+1)*bitWidth, startY + plotHeight, PLOT_MESH, DRAW_EMPTY, DOT_PIXEL_1X1);
+        GUI_DrawRectangle(5+idleWidth + i*bitWidth, startY, 5+idleWidth + (i+1)*bitWidth, startY + plotHeight, PLOT_MESH, DRAW_EMPTY, DOT_PIXEL_1X1);
     }
 }
 
