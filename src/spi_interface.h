@@ -143,10 +143,18 @@ void SPIInterface::dataPresentation() {
     Button* buttons = new Button[1];
 
     GUI_Clear(LAVENDER_WEB);
-    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
-
     buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
     GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
+
+    GUI_DisString_EN(80, 6, "vertical indicators description:", &Font12, WHITE, BLACK);
+    GUI_DisString_EN(83, 18, "propagation", &Font16, WHITE, PLOT_GREEN);
+    GUI_DisString_EN(210, 18, "sampling", &Font16, WHITE, PLOT_ORANGE);
+
+    std::stringstream ss;
+    ss << "MOSI " << "[" << byteToHexString(byteSelected) << "]";
+    GUI_DisString_EN(139, 48, "SCLK", &Font16, WHITE, PLOT_RED);
+    GUI_DisString_EN(107, 157, ss.str().c_str(), &Font16, WHITE, PLOT_BLUE);
+    GUI_DisString_EN(149, 221, "CS", &Font16, WHITE, PLOT_DARK_PINK);
 
     plotSCLK();
     plotMOSI();
@@ -201,7 +209,7 @@ void SPIInterface::plotMOSI() {
 }
 
 void SPIInterface::plotCS() {
-    DigitalSignalPlot plotCS(180, 1, 18, 32, PLOT_DARK_PINK);
+    DigitalSignalPlot plotCS(185, 1, 18, 32, PLOT_DARK_PINK);
     for(int i=0; i<18; i++) {
         plotCS.drawNextBit(0, PLOT_DARK_PINK);
     }

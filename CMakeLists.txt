@@ -30,4 +30,4 @@ pico_enable_stdio_uart(main 0)
 # create map/bin/hex/uf2 file etc.
 pico_add_extra_outputs(main)
 
-target_link_libraries(main src lcd font config pico_stdlib hardware_spi fatfs)
+target_link_libraries(main src lcd font config pico_stdlib hardware_i2c hardware_spi fatfs)

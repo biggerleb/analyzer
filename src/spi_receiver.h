@@ -46,7 +46,7 @@ public:
     }
 };
 
-void onSpiRx() { // to trzeba poprawić
+void onSpiRx() {
     uint8_t byteReceived;
     while(spi_is_readable(spi0) && g_charsRxed < g_bufferSize) {
         g_buffer[g_charsRxed] = spi0_hw->dr;

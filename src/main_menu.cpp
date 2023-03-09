@@ -46,7 +46,6 @@ void takeAction(int buttonClicked, Button* menuButtons) {
 	delete [] menuButtons;
 	switch(buttonClicked) {
 		case UARTe: {
-			// DigitalSignalInterface* UARTInterface = new DigitalSignalInterface("UART", 200, 300000, 1, 200);
 			UARTInterface* uartInterface = new UARTInterface("UART", 200, 300000, 1, 200);
 			uartInterface->mainFlow();
 			mainMenu();
