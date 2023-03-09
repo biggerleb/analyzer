@@ -18,7 +18,8 @@
 #define LIST_NUMBER_OF_EL 14
 
 enum FlowEnum { MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE, FIGURE_INPUT_SIZE, DATA_BEING_COLLECTED,
-                UART_SELECT_PARITY, UART_SELECT_STOP_BITS, DATA_LIST, BYTE_PRESENTATION, SPI_SELECT_FORMAT};
+                UART_SELECT_PARITY, UART_SELECT_STOP_BITS, DATA_LIST, BYTE_PRESENTATION, SPI_SELECT_FORMAT, I2C_ADDRESS_MESSAGE,
+                I2C_ADDRESS_INPUT, SELECT_ROLE};
 
 class DigitalSignalInterface {
 protected:
@@ -215,7 +216,7 @@ int DigitalSignalInterface::figureInput() {
 
     FigureDisplay figureDisplay = FigureDisplay();
 
-    while(nextView == FIGURE_INPUT_BAUDRATE || nextView == FIGURE_INPUT_SIZE) {
+    while(nextView == FIGURE_INPUT_BAUDRATE || nextView == FIGURE_INPUT_SIZE || nextView == I2C_ADDRESS_INPUT) {
         sleep_ms(400);
         int buttonClicked = Button::lookForCollision(buttons, OK);
         switch (buttonClicked) {
