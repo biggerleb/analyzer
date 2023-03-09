@@ -10,6 +10,7 @@ extern "C" {
 #include "uart_interface.h"
 #include "spi_interface.h"
 #include "i2c_interface.h"
+#include "hardware/i2c.h"
 
 void showMenuGUI(Button* menuButtons);
 void takeAction(int buttonClicked, Button* menuButtons);
