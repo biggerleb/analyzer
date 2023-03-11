@@ -41,7 +41,7 @@ protected:
     int figureInput();
     void backToMainMenu();
     void waitingScreen();
-    void dataList();
+    virtual void dataList();
     // virtual void dataReceiving();
 
     bool* byteToBits(uint8_t byte); // remember to delete when done working with
