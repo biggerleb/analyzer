@@ -13,6 +13,7 @@ private:
     void messageSlaveAddress();
     void dataReceiving();
     void dataPresentation();
+    void dataList();
 
     void plotSCL();
     void plotSDA();
@@ -139,6 +140,76 @@ void I2CInterface::plotSCL() {
     }
     // plotSCL.toIdleState(false);
     plotSCL.toIdleState();
+}
+
+void I2CInterface::dataList() {
+    GUI_Clear(LAVENDER_WEB);
+    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
+
+    enum controlButtonsEnum {CANCEL, PREVIOUS, NEXT};
+    Button* controlButtons = new Button[3];
+
+    controlButtons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
+    GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
+
+    if (listOffset > 0) {
+        controlButtons[1] = (*new Button(2, 42, 103, 143, OXFORD_BLUE, PREVIOUS));
+        GUI_DisString_EN(12, 117, "<-", &Font16, WHITE, WHITE);
+    }
+    if (sizeSet > (listOffset+1) * LIST_NUMBER_OF_EL) {
+        controlButtons[2] = (*new Button(278, 318, 103, 143, OXFORD_BLUE, NEXT));
+        GUI_DisString_EN(289, 117, "->", &Font16, WHITE, WHITE);
+    }
+
+    Button* listItems = new Button[sizeSet];
+    int xOffset = 0;
+    int yOffset = 0;
+    for(int columnIndex=0; columnIndex<2; columnIndex++) {
+        for(int rowIndex=0; rowIndex<7; rowIndex++) {
+            int index = listOffset * LIST_NUMBER_OF_EL + columnIndex*7 + rowIndex;
+            if (index >= sizeSet) break;
+            int startX = LIST_X_START + columnIndex * (LIST_X_MARGIN + LIST_EL_WIDTH);
+            int endX = startX + LIST_EL_WIDTH;
+            int startY = LIST_Y_START + rowIndex * (LIST_Y_MARGIN + LIST_EL_HEIGHT);
+            int endY = startY + LIST_EL_HEIGHT;
+
+            listItems[index] = (*new Button(startX, endX, startY, endY, SILK, index));
+            GUI_DisString_EN(startX+3, startY+9, (std::to_string(index+1)+":").c_str(), &Font16, WHITE, BLACK);
+            GUI_DisString_EN(startX+42, startY+9, byteToHexString(dataBuffer[index]).c_str(), &Font16, WHITE, BLACK);
+        }
+    }
+    
+    bool dataListReload = false;
+    sleep_ms(400);
+    while (nextView != MAIN_MENU && nextView != BYTE_PRESENTATION && dataListReload == false) {
+        int controlButtonClicked = Button::singleCheckForCollision(controlButtons, NEXT);
+        switch (controlButtonClicked) {
+            case MAIN_MENU:
+                nextView = MAIN_MENU;
+                clearGlobalBuffer();
+                break;
+            case PREVIOUS:
+                listOffset -= 1;
+                nextView = DATA_LIST;
+                dataListReload = true;
+                break;
+            case NEXT:
+                listOffset += 1;
+                nextView = DATA_LIST;
+                dataListReload = true;
+                break;
+        }
+        int firstIndexOnScreen = listOffset * LIST_NUMBER_OF_EL;
+        int lastIndexOnScreen = (listOffset + 1) * LIST_NUMBER_OF_EL - 1;
+        int listElementClicked = Button::singleCheckForCollision(listItems, lastIndexOnScreen, firstIndexOnScreen);
+        if (listElementClicked != -1) {
+            byteSelected = dataBuffer[listElementClicked];
+            nextView = BYTE_PRESENTATION;
+        }
+    }
+
+    delete[] controlButtons;
+    delete[] listItems;
 }
 
 void I2CInterface::mainFlow() {
