@@ -14,9 +14,12 @@ private:
     void dataReceiving();
     void dataPresentation();
     void dataList();
+    void addressPresentation();
 
     void plotSCL();
     void plotSDA();
+    void plotAddressSCL();
+    void plotAddressSDA();
 public:
     void mainFlow();
 
@@ -122,6 +125,36 @@ void I2CInterface::dataPresentation() {
     delete[] buttons;
 }
 
+void I2CInterface::addressPresentation() {
+    enum buttonEnums {CANCEL};
+    Button* buttons = new Button[1];
+
+    GUI_Clear(LAVENDER_WEB);
+    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
+    buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
+    GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
+
+    std::stringstream ss;
+    ss << "SDA " << "[" << "Address " << slaveAddress << "]";
+    GUI_DisString_EN(75, 52, ss.str().c_str(), &Font16, WHITE, PLOT_BLUE);
+    GUI_DisString_EN(143, 154, "SCL", &Font16, WHITE, PLOT_RED);
+
+    GUI_DisString_EN(25, 123, "start", &Font12, WHITE, PLOT_GREEN);
+    GUI_DisString_EN(88, 123, "address", &Font12, WHITE, PLOT_BLUE);
+    GUI_DisString_EN(165, 123, "write", &Font12, WHITE, PLOT_PINK);
+    GUI_DisString_EN(220, 123, "acknowledge", &Font12, WHITE, PLOT_ORANGE);
+
+    plotAddressSDA();
+    plotAddressSCL();
+
+    while(nextView != DATA_LIST) {
+        int buttonClicked = Button::lookForCollision(buttons, CANCEL);
+        if (buttonClicked == CANCEL) nextView = DATA_LIST;
+    }
+
+    delete[] buttons;
+}
+
 void I2CInterface::plotSDA() {
     DigitalSignalPlot plotSDA(75, 0, 9, 42, 30, PLOT_ORANGE);
     bool* bitsFromByte = byteToBits(byteSelected);
@@ -138,7 +171,29 @@ void I2CInterface::plotSCL() {
     for(int i=0; i<19; i++) {
         plotSCL.drawNextBit(!(plotSCL.lastBitState), PLOT_RED);
     }
-    // plotSCL.toIdleState(false);
+    plotSCL.toIdleState();
+}
+
+void I2CInterface::plotAddressSDA() {
+    DigitalSignalPlot plotSDA(75, 1, 10, 42, 28, BLACK);
+    bool* bitsFromByte = byteToBits((uint8_t)slaveAddress); // tutaj daj adres
+    plotSDA.drawNextBit(0, PLOT_GREEN);
+    for (int i=6; i>=0; i--) {
+        plotSDA.drawNextBit(bitsFromByte[i], PLOT_BLUE);
+    }
+    plotSDA.drawNextBit(0, PLOT_PINK);
+    plotSDA.drawNextBit(0, PLOT_ORANGE);
+    plotSDA.idleColor = BLACK;
+    plotSDA.toIdleState();
+}
+
+void I2CInterface::plotAddressSCL() {
+    DigitalSignalPlot plotSCL(175, 1, 21, 42, PLOT_RED);
+    plotSCL.drawNextBit(1, PLOT_RED);
+    plotSCL.drawNextBit(1, PLOT_RED);
+    for(int i=2; i<21; i++) {
+        plotSCL.drawNextBit(!(plotSCL.lastBitState), PLOT_RED);
+    }
     plotSCL.toIdleState();
 }
 
@@ -161,27 +216,32 @@ void I2CInterface::dataList() {
         GUI_DisString_EN(289, 117, "->", &Font16, WHITE, WHITE);
     }
 
-    Button* listItems = new Button[sizeSet];
+    Button* listItems = new Button[sizeSet+1];
     int xOffset = 0;
     int yOffset = 0;
     for(int columnIndex=0; columnIndex<2; columnIndex++) {
         for(int rowIndex=0; rowIndex<7; rowIndex++) {
             int index = listOffset * LIST_NUMBER_OF_EL + columnIndex*7 + rowIndex;
-            if (index >= sizeSet) break;
+            if (index > sizeSet) break;
             int startX = LIST_X_START + columnIndex * (LIST_X_MARGIN + LIST_EL_WIDTH);
             int endX = startX + LIST_EL_WIDTH;
             int startY = LIST_Y_START + rowIndex * (LIST_Y_MARGIN + LIST_EL_HEIGHT);
             int endY = startY + LIST_EL_HEIGHT;
 
-            listItems[index] = (*new Button(startX, endX, startY, endY, SILK, index));
-            GUI_DisString_EN(startX+3, startY+9, (std::to_string(index+1)+":").c_str(), &Font16, WHITE, BLACK);
-            GUI_DisString_EN(startX+42, startY+9, byteToHexString(dataBuffer[index]).c_str(), &Font16, WHITE, BLACK);
+            if (index == 0) {       // address frame
+                listItems[index] = (*new Button(startX, endX, startY, endY, SILK, index));
+                GUI_DisString_EN(startX+7, startY+9, "Address", &Font16, WHITE, BLACK);
+            } else {
+                listItems[index] = (*new Button(startX, endX, startY, endY, SILK, index));
+                GUI_DisString_EN(startX+3, startY+9, (std::to_string(index)+":").c_str(), &Font16, WHITE, BLACK);
+                GUI_DisString_EN(startX+42, startY+9, byteToHexString(dataBuffer[index-1]).c_str(), &Font16, WHITE, BLACK);
+            }
         }
     }
     
     bool dataListReload = false;
     sleep_ms(400);
-    while (nextView != MAIN_MENU && nextView != BYTE_PRESENTATION && dataListReload == false) {
+    while (nextView != MAIN_MENU && nextView != BYTE_PRESENTATION && nextView != I2C_ADDRESS_PRESENTATION && dataListReload == false) {
         int controlButtonClicked = Button::singleCheckForCollision(controlButtons, NEXT);
         switch (controlButtonClicked) {
             case MAIN_MENU:
@@ -203,8 +263,12 @@ void I2CInterface::dataList() {
         int lastIndexOnScreen = (listOffset + 1) * LIST_NUMBER_OF_EL - 1;
         int listElementClicked = Button::singleCheckForCollision(listItems, lastIndexOnScreen, firstIndexOnScreen);
         if (listElementClicked != -1) {
-            byteSelected = dataBuffer[listElementClicked];
-            nextView = BYTE_PRESENTATION;
+            if (listElementClicked == 0) {      // address frame
+                nextView = I2C_ADDRESS_PRESENTATION;
+            } else {
+                byteSelected = dataBuffer[listElementClicked-1];
+                nextView = BYTE_PRESENTATION;
+            }
         }
     }
 
@@ -253,6 +317,9 @@ void I2CInterface::mainFlow() {
                 break;
             case BYTE_PRESENTATION:
                 dataPresentation();
+                break;
+            case I2C_ADDRESS_PRESENTATION:
+                addressPresentation();
                 break;
         }
     }
