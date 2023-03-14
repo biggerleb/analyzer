@@ -22,7 +22,7 @@ public:
     void mainFlow();
 
     SPIInterface(std::string name, int minSize, int maxSize):
-        DigitalSignalInterface(name, minSize, maxSize, MESSAGE_SIZE), CPOL(SPI_CPOL_0), CPHA(SPI_CPHA_0) {}
+        DigitalSignalInterface(name, minSize, maxSize, SPI_SELECT_FORMAT), CPOL(SPI_CPOL_0), CPHA(SPI_CPHA_0) {}
 };
 
 void SPIInterface::selectFormat() {
@@ -50,7 +50,7 @@ void SPIInterface::selectFormat() {
     buttons[4] = *selectCPHA[0];
     buttons[5] = *selectCPHA[1];
 
-    while(nextView != MAIN_MENU && nextView != DATA_BEING_COLLECTED) {
+    while(nextView != MAIN_MENU && nextView != MESSAGE_SIZE) {
         sleep_ms(400);
         int buttonClicked = Button::lookForCollision(buttons, CPHA_1);
 
@@ -62,7 +62,7 @@ void SPIInterface::selectFormat() {
             }
             case CONTINUE: {
                 puts("CONTINUE");
-                nextView = DATA_BEING_COLLECTED;
+                nextView = MESSAGE_SIZE;
                 break;
             }
             case CPOL_0:
@@ -227,7 +227,7 @@ void SPIInterface::mainFlow() {
             case FIGURE_INPUT_SIZE:
                 figure = figureInput();
                 if (figure != -1) {
-                    nextView = SPI_SELECT_FORMAT;
+                    nextView = DATA_BEING_COLLECTED;
                     sizeSet = figure;
                     printf("sizeSet: %d", sizeSet);
                 }

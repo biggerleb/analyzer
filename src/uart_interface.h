@@ -133,7 +133,7 @@ void UARTInterface::selectStopBits() {
     buttons[2] = *onlySelect[0];
     buttons[3] = *onlySelect[1];
 
-    while(nextView != MAIN_MENU && nextView != DATA_BEING_COLLECTED) {
+    while(nextView != MAIN_MENU && nextView != MESSAGE_SIZE) {
         sleep_ms(400);
         int buttonClicked = Button::lookForCollision(buttons, STOP_BITS_2);
 
@@ -145,7 +145,7 @@ void UARTInterface::selectStopBits() {
             }
             case CONTINUE: {
                 puts("CONTINUE");
-                nextView = DATA_BEING_COLLECTED;
+                nextView = MESSAGE_SIZE;
                 break;
             }
             case STOP_BIT_1:
@@ -279,7 +279,7 @@ void UARTInterface::mainFlow() {
             case FIGURE_INPUT_BAUDRATE:
                 figure = figureInput();
                 if (figure != -1) {
-                    nextView = MESSAGE_SIZE;
+                    nextView = UART_SELECT_PARITY;
                     baudrateSet = figure;
                     printf("baudrateSet: %d", baudrateSet);
                 }
@@ -293,7 +293,7 @@ void UARTInterface::mainFlow() {
             case FIGURE_INPUT_SIZE:
                 figure = figureInput();
                 if (figure != -1) {
-                    nextView = UART_SELECT_PARITY;
+                    nextView = DATA_BEING_COLLECTED;
                     sizeSet = figure;
                     printf("sizeSet: %d", sizeSet);
                 }
