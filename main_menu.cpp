@@ -47,18 +47,18 @@ void takeAction(int buttonClicked, Button* menuButtons) {
 	delete [] menuButtons;
 	switch(buttonClicked) {
 		case UARTe: {
-			UARTInterface* uartInterface = new UARTInterface("UART", 200, 300000, 1, 200);
+			UARTInterface* uartInterface = new UARTInterface("UART", 50, 921600, 1, 200);
 			uartInterface->mainFlow();
 			mainMenu();
 			break;
 		}
 		case SPIe: {
-			SPIInterface* spiInterface = new SPIInterface("SPI", 200, 11000000, 1, 200);
+			SPIInterface* spiInterface = new SPIInterface("SPI", 1, 200);
 			spiInterface->mainFlow();
 			break;
 		}
 		case I2Ce: {
-			I2CInterface* i2cInterface = new I2CInterface("I2C", 200, 300000, 1, 200);
+			I2CInterface* i2cInterface = new I2CInterface("I2C", 1, 200);
 			i2cInterface->mainFlow();
 			break;
 		}

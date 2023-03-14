@@ -9,10 +9,13 @@
 
 class UARTInterface : public DigitalSignalInterface {
 private:
+    int minBaudrate;
+    int maxBaudrate;
     uart_parity_t parity;
     uint stopBits;
 
 public:
+    void messageBaudrate();
     void selectParity();
     void selectStopBits();
     void dataReceiving();
@@ -22,8 +25,39 @@ public:
     bool calculateParityBit(bool* bitsFromByte);
 
     UARTInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
-        DigitalSignalInterface(name, minBaudrate, maxBaudrate, minSize, maxSize, MESSAGE_BAUDRATE), parity(UART_PARITY_NONE), stopBits(1) {}
+        DigitalSignalInterface(name, minSize, maxSize, MESSAGE_BAUDRATE), parity(UART_PARITY_NONE),
+                                                        stopBits(1), minBaudrate(minBaudrate), maxBaudrate(maxBaudrate) {}
 };
+
+void UARTInterface::messageBaudrate() {
+    enum buttonEnums {CANCEL, CONTINUE};
+    Button* buttons = new Button[2]; // remember to delete
+    
+    messageTemplate(buttons, CANCEL, CONTINUE);
+
+    GUI_DisString_EN(22, 88, "Select baudrate in bits/s", &Font16, WHITE, BLACK);
+
+    std::string min = "min: " + std::to_string(minBaudrate);
+    std::string max = "max: " + std::to_string(maxBaudrate);
+    GUI_DisString_EN(115, 116, min.c_str(), &Font16, WHITE, BLACK);
+    GUI_DisString_EN(115, 136, max.c_str(), &Font16, WHITE, BLACK);
+    
+    sleep_ms(400);
+    int buttonClicked = Button::lookForCollision(buttons, CONTINUE);
+
+    switch(buttonClicked) {
+        case CANCEL: {
+            puts("CANCEL");
+            nextView = MAIN_MENU;
+            break;
+        }
+        case CONTINUE: {
+            puts("CONTINUE");
+            nextView = FIGURE_INPUT_BAUDRATE;
+            break;
+        }
+    }
+}
 
 void UARTInterface::selectParity() {
     enum buttonEnums {CANCEL, CONTINUE, SELECT_NONE, SELECT_EVEN, SELECT_ODD};

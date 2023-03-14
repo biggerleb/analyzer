@@ -2,6 +2,10 @@
 #define __UART_RECEIVER_H
 
 #include "global_buffer.h"
+#include "pico/stdlib.h"
+#include "hardware/uart.h"
+#include "hardware/irq.h"
+
 
 #define UART_ID uart0
 #define UART_TX_PIN 0

@@ -24,8 +24,6 @@ enum FlowEnum { MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE
 class DigitalSignalInterface {
 protected:
     std::string name;
-    int minBaudrate;
-    int maxBaudrate;
     int minSize;
     int maxSize;
     FlowEnum nextView;
@@ -36,7 +34,6 @@ protected:
     uint8_t* dataBuffer;
 
     void messageTemplate(Button* buttons, int enumForCancel, int enumForContinue);
-    void messageBaudrate();
     void messageSize();
     int figureInput();
     void backToMainMenu();
@@ -51,8 +48,8 @@ protected:
 public:
     virtual void mainFlow();
 
-    DigitalSignalInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize, FlowEnum firstView):
-        name(name), minBaudrate(minBaudrate), maxBaudrate(maxBaudrate), minSize(minSize), maxSize(maxSize),
+    DigitalSignalInterface(std::string name, int minSize, int maxSize, FlowEnum firstView):
+        name(name), minSize(minSize), maxSize(maxSize),
         nextView(firstView), baudrateSet(0), sizeSet(0), listOffset(0), byteSelected(0) {}
 };
 
@@ -61,9 +58,6 @@ void DigitalSignalInterface::mainFlow() {
         if (nextView == MAIN_MENU) break;
         int figure;
         switch (nextView) {
-            case MESSAGE_BAUDRATE:
-                messageBaudrate();
-                break;
             case FIGURE_INPUT_BAUDRATE:
                 figure = figureInput();
                 if (figure != -1) {
@@ -106,35 +100,7 @@ void DigitalSignalInterface::messageTemplate(Button* buttons, int enumForCancel,
     GUI_DisString_EN(116, 180, "CONTINUE", &Font16, WHITE, BLACK);
 }
 
-void DigitalSignalInterface::messageBaudrate() {
-    enum buttonEnums {CANCEL, CONTINUE};
-    Button* buttons = new Button[2]; // remember to delete
-    
-    messageTemplate(buttons, CANCEL, CONTINUE);
 
-    GUI_DisString_EN(22, 88, "Select baudrate in bits/s", &Font16, WHITE, BLACK);
-
-    std::string min = "min: " + std::to_string(minBaudrate);
-    std::string max = "max: " + std::to_string(maxBaudrate);
-    GUI_DisString_EN(115, 116, min.c_str(), &Font16, WHITE, BLACK);
-    GUI_DisString_EN(115, 136, max.c_str(), &Font16, WHITE, BLACK);
-    
-    sleep_ms(400);
-    int buttonClicked = Button::lookForCollision(buttons, CONTINUE);
-
-    switch(buttonClicked) {
-        case CANCEL: {
-            puts("CANCEL");
-            nextView = MAIN_MENU;
-            break;
-        }
-        case CONTINUE: {
-            puts("CONTINUE");
-            nextView = FIGURE_INPUT_BAUDRATE;
-            break;
-        }
-    }
-}
 
 void DigitalSignalInterface::messageSize() {
     enum buttonEnums {CANCEL, CONTINUE};

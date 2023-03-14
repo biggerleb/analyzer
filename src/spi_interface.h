@@ -21,8 +21,8 @@ private:
 public:
     void mainFlow();
 
-    SPIInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
-        DigitalSignalInterface(name, minBaudrate, maxBaudrate, minSize, maxSize, MESSAGE_SIZE), CPOL(SPI_CPOL_0), CPHA(SPI_CPHA_0) {}
+    SPIInterface(std::string name, int minSize, int maxSize):
+        DigitalSignalInterface(name, minSize, maxSize, MESSAGE_SIZE), CPOL(SPI_CPOL_0), CPHA(SPI_CPHA_0) {}
 };
 
 void SPIInterface::selectFormat() {

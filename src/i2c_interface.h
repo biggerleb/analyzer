@@ -23,8 +23,8 @@ private:
 public:
     void mainFlow();
 
-    I2CInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
-        DigitalSignalInterface(name, minBaudrate, maxBaudrate, minSize, maxSize, I2C_ADDRESS_MESSAGE), isSlave(false), slaveAddress(0) {}
+    I2CInterface(std::string name, int minSize, int maxSize):
+        DigitalSignalInterface(name, minSize, maxSize, I2C_ADDRESS_MESSAGE), isSlave(false), slaveAddress(0) {}
 };
 
 
