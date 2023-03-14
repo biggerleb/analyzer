@@ -278,7 +278,7 @@ void UARTInterface::mainFlow() {
                 break;
             case FIGURE_INPUT_BAUDRATE:
                 figure = figureInput();
-                if (figure != -1) {
+                if (figure != -1 && figure <= maxBaudrate && figure >= minBaudrate) {
                     nextView = UART_SELECT_PARITY;
                     baudrateSet = figure;
                     printf("baudrateSet: %d", baudrateSet);
@@ -292,7 +292,7 @@ void UARTInterface::mainFlow() {
                 break;
             case FIGURE_INPUT_SIZE:
                 figure = figureInput();
-                if (figure != -1) {
+                if (figure != -1 && figure <= maxSize && figure >= minSize) {
                     nextView = DATA_BEING_COLLECTED;
                     sizeSet = figure;
                     printf("sizeSet: %d", sizeSet);

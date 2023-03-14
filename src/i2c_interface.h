@@ -36,7 +36,7 @@ void I2CInterface::messageSlaveAddress() {
 
     GUI_DisString_EN(52, 80, "Assign slave address", &Font16, WHITE, BLACK);
 
-    GUI_DisString_EN(115, 116, "min: 0", &Font16, WHITE, BLACK);
+    GUI_DisString_EN(115, 116, "min: 1", &Font16, WHITE, BLACK);
     GUI_DisString_EN(115, 136, "max: 127", &Font16, WHITE, BLACK);
     
     sleep_ms(400);
@@ -286,7 +286,7 @@ void I2CInterface::mainFlow() {
                 break;
             case FIGURE_INPUT_SIZE:
                 figure = figureInput();
-                if (figure != -1) {
+                if (figure != -1 && figure <= maxSize && figure >= minSize) {
                     nextView = DATA_BEING_COLLECTED;
                     sizeSet = figure;
                     printf("sizeSet: %d", sizeSet);
@@ -300,7 +300,7 @@ void I2CInterface::mainFlow() {
                 break;
             case I2C_ADDRESS_INPUT:
                 figure = figureInput();
-                if (figure != -1) {
+                if (figure != -1 && figure >= 1 && figure <= 127) {
                     nextView = MESSAGE_SIZE;
                     slaveAddress = figure;
                     printf("sizeSet: %d", sizeSet);
