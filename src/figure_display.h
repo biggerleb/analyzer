@@ -22,6 +22,7 @@ public:
     void writeDigit(int digit) {
         if (digit == 0 && figure == 0) return;
         figure = figure*10 + digit;
+        if (figure > 999999999) return;
         offsetX += -17;
         clearDisplay();
         GUI_DisString_EN(offsetX, y, std::to_string(figure).c_str(), &Font24, WHITE, BLACK);
