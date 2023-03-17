@@ -11,6 +11,7 @@ class UARTInterface : public DigitalSignalInterface {
 private:
     int minBaudrate;
     int maxBaudrate;
+    int baudrateSet;
     uart_parity_t parity;
     uint stopBits;
 
@@ -26,7 +27,7 @@ public:
 
     UARTInterface(std::string name, int minBaudrate, int maxBaudrate, int minSize, int maxSize):
         DigitalSignalInterface(name, minSize, maxSize, MESSAGE_BAUDRATE), parity(UART_PARITY_NONE),
-                                                        stopBits(1), minBaudrate(minBaudrate), maxBaudrate(maxBaudrate) {}
+                                        stopBits(1), minBaudrate(minBaudrate), maxBaudrate(maxBaudrate), baudrateSet(0) {}
 };
 
 void UARTInterface::messageBaudrate() {
