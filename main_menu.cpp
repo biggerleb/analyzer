@@ -10,7 +10,9 @@ extern "C" {
 #include "uart_interface.h"
 #include "spi_interface.h"
 #include "i2c_interface.h"
+#include "analog_signal_interface.h"
 #include "hardware/i2c.h"
+#include "hardware/adc.h"
 
 void showMenuGUI(Button* menuButtons);
 void takeAction(int buttonClicked, Button* menuButtons);
@@ -45,11 +47,11 @@ void showMenuGUI(Button* menuButtons) {
 
 void takeAction(int buttonClicked, Button* menuButtons) {
 	delete [] menuButtons;
-	switch(buttonClicked) {
+	switch(buttonClicked) { // all of those dynamically created interfaces down belove should get deleted after
 		case UARTe: {
 			UARTInterface* uartInterface = new UARTInterface("UART", 50, 921600, 1, 200);
 			uartInterface->mainFlow();
-			mainMenu();
+			mainMenu(); // what is this for? probably shouldnt be there, may casue bugs
 			break;
 		}
 		case SPIe: {
@@ -63,7 +65,8 @@ void takeAction(int buttonClicked, Button* menuButtons) {
 			break;
 		}
 		case ANALOGe: {
-			puts("ANALOG");
+			AnalogSignalInterface* analogInterface = new AnalogSignalInterface();
+			analogInterface->mainFlow();
 			break;
 		}
 	}

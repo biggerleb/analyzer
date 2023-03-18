@@ -1,18 +1,19 @@
-#ifndef __ANALOG_SIGNAL_INTERFACE_H
-#define __ANALOG_SIGNAL_INTERFACE_H
+#ifndef __SIGNAL_INTERFACE_H
+#define __SIGNAL_INTERFACE_H
 
 #include "figure_display.h"
 #include "global_buffer.h"
 
 enum FlowEnum { MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE, FIGURE_INPUT_SIZE, DATA_BEING_COLLECTED,
                 UART_SELECT_PARITY, UART_SELECT_STOP_BITS, DATA_LIST, BYTE_PRESENTATION, SPI_SELECT_FORMAT, I2C_ADDRESS_MESSAGE,
-                I2C_ADDRESS_INPUT, SELECT_ROLE, I2C_ADDRESS_PRESENTATION};
+                I2C_ADDRESS_INPUT, SELECT_ROLE, I2C_ADDRESS_PRESENTATION, ANALOG_MESSAGE_FREQUENCY, ANALOG_INPUT_FREQUENCY};
 
 class SignalInterface {
 protected:
     std::string name;
     FlowEnum nextView;
 
+    virtual void dataReceiving()=0;
     void messageTemplate(Button* buttons, int enumForCancel, int enumForContinue);
     int figureInput();
 public:
@@ -79,7 +80,7 @@ int SignalInterface::figureInput() {
 
     FigureDisplay figureDisplay = FigureDisplay();
 
-    while(nextView == FIGURE_INPUT_BAUDRATE || nextView == FIGURE_INPUT_SIZE || nextView == I2C_ADDRESS_INPUT) {
+    while(nextView == FIGURE_INPUT_BAUDRATE || nextView == FIGURE_INPUT_SIZE || nextView == I2C_ADDRESS_INPUT || nextView == ANALOG_INPUT_FREQUENCY) { // definitely change it so it takes argument and not checks all posibilites
         sleep_ms(400);
         int buttonClicked = Button::lookForCollision(buttons, OK);
         switch (buttonClicked) {

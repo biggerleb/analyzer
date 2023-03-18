@@ -246,7 +246,7 @@ void I2CInterface::dataList() {
         switch (controlButtonClicked) {
             case MAIN_MENU:
                 nextView = MAIN_MENU;
-                clearGlobalBuffer();
+                clearGlobalBuffer(); // to chyba do usuniecia
                 break;
             case PREVIOUS:
                 listOffset -= 1;
