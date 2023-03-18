@@ -4,23 +4,31 @@
 #include "signal_interface.h"
 #include "analog_receiver.h"
 
+#define PLOT_HEIGHT 180.0
+#define PLOT_WIDTH 312
+#define PLOT_X_START 4
+#define PLOT_Y_START 51
+
 class AnalogSignalInterface : public SignalInterface {
 private:
     uint frequency;
     uint minFrequency;
     uint maxFrequency;
     uint16_t* dataBuffer;
+    int bufferSize;
+    uint samplesPerPeriod;
 public:
     void messageFrequency();
     void mainFlow();
     void dataReceiving();
+    void dataPresentation();
 
-    AnalogSignalInterface(): SignalInterface("Analog", ANALOG_MESSAGE_FREQUENCY), frequency(0), minFrequency(10), maxFrequency(1500) {}
+    AnalogSignalInterface(): SignalInterface("Analog", ANALOG_MESSAGE_FREQUENCY), frequency(0), minFrequency(10), maxFrequency(10000) {}
 };
 
 void AnalogSignalInterface::messageFrequency() {
     enum buttonEnums {CANCEL, CONTINUE};
-    Button* buttons = new Button[2]; // remember to delete
+    Button* buttons = new Button[2];
     
     messageTemplate(buttons, CANCEL, CONTINUE);
 
@@ -66,19 +74,16 @@ void AnalogSignalInterface::dataReceiving() { // if receivers would inherit from
     analogReceiver.init();
 
     sleep_ms(400);
-    while(nextView != MAIN_MENU && nextView != DATA_LIST) {
+    while(nextView != MAIN_MENU && nextView != ANALOG_SIGNAL_PRESENTATION) {
         int buttonClicked = -1;
         while (buttonClicked == -1) {
             buttonClicked = Button::singleCheckForCollision(buttons, CANCEL);
             if (analogReceiver.isBufferFull()) {
                 puts("full");
                 dataBuffer = analogReceiver.getBuffer();
-                nextView = MAIN_MENU;
-                //--------------------------------
-                for(int i=0; i<g_bufferSize; i++) {
-                    printf("%d:    %d \n", i, g_analog_buffer[i]);
-                }
-                //--------------------------------
+                bufferSize = analogReceiver.getBufferSize();
+                samplesPerPeriod = analogReceiver.getSamplesPerPeriod();
+                nextView = ANALOG_SIGNAL_PRESENTATION;
                 break;
             }
         }
@@ -92,6 +97,41 @@ void AnalogSignalInterface::dataReceiving() { // if receivers would inherit from
         }
     }
     delete [] buttons;
+}
+
+void AnalogSignalInterface::dataPresentation() {
+    enum buttonEnums {CANCEL};
+    Button* buttons = new Button[1];
+
+    GUI_Clear(LAVENDER_WEB);
+    buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
+    GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
+
+    GUI_DrawRectangle(4, 45, 316, 237, WHITE, DRAW_FULL, DOT_PIXEL_DFT);
+
+    for(int i=0; i<(samplesPerPeriod-1); i++) {
+        uint xCurrentSample, yCurrentSample, xNextSample, yNextSample;
+        xCurrentSample = PLOT_X_START + (i * PLOT_WIDTH / samplesPerPeriod);
+        xNextSample = PLOT_X_START+ ((i+1) * PLOT_WIDTH / samplesPerPeriod);
+        yCurrentSample = PLOT_Y_START+180 - (PLOT_HEIGHT/(1<<12) * dataBuffer[i]);
+        yNextSample = PLOT_Y_START+180 - (PLOT_HEIGHT/(1<<12) * dataBuffer[i+1]);
+        GUI_DrawLine(xCurrentSample, yCurrentSample, xNextSample, yNextSample, PLOT_BLUE, LINE_SOLID, DOT_PIXEL_2X2);
+    }
+
+    GUI_DrawLine(4, 50, 316, 50, PLOT_ORANGE, LINE_SOLID, DOT_PIXEL_1X1);
+    GUI_DisString_EN(9, 55, "3.3 V", &Font16, WHITE, PLOT_ORANGE);
+    GUI_DrawLine(4, 232, 316, 232, PLOT_ORANGE, LINE_SOLID, DOT_PIXEL_1X1);
+    GUI_DisString_EN(9, 214, "0 V", &Font16, WHITE, PLOT_ORANGE);
+
+    while(nextView != MAIN_MENU) {
+        int buttonClicked = Button::lookForCollision(buttons, CANCEL);
+        if (buttonClicked == CANCEL) {
+            clearGlobalAnalogBuffer();
+            nextView = MAIN_MENU;
+        }
+    }
+
+    delete[] buttons;
 }
 
 void AnalogSignalInterface::mainFlow() {
@@ -114,6 +154,9 @@ void AnalogSignalInterface::mainFlow() {
                 break;
             case DATA_BEING_COLLECTED:
                 dataReceiving();
+                break;
+            case ANALOG_SIGNAL_PRESENTATION:
+                dataPresentation();
                 break;
         }
     }

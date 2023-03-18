@@ -12,7 +12,7 @@ void clearGlobalBuffer() {
     delete[] g_buffer;
 }
 
-void clearGlobalBufferAnalog() {
+void clearGlobalAnalogBuffer() {
     g_charsRxed = 0;
     g_bufferSize = 0;
     delete[] g_analog_buffer;

@@ -6,7 +6,8 @@
 
 enum FlowEnum { MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE, FIGURE_INPUT_SIZE, DATA_BEING_COLLECTED,
                 UART_SELECT_PARITY, UART_SELECT_STOP_BITS, DATA_LIST, BYTE_PRESENTATION, SPI_SELECT_FORMAT, I2C_ADDRESS_MESSAGE,
-                I2C_ADDRESS_INPUT, SELECT_ROLE, I2C_ADDRESS_PRESENTATION, ANALOG_MESSAGE_FREQUENCY, ANALOG_INPUT_FREQUENCY};
+                I2C_ADDRESS_INPUT, SELECT_ROLE, I2C_ADDRESS_PRESENTATION, ANALOG_MESSAGE_FREQUENCY, ANALOG_INPUT_FREQUENCY,
+                ANALOG_SIGNAL_PRESENTATION};
 
 class SignalInterface {
 protected:
@@ -14,6 +15,7 @@ protected:
     FlowEnum nextView;
 
     virtual void dataReceiving()=0;
+    virtual void dataPresentation()=0;
     void messageTemplate(Button* buttons, int enumForCancel, int enumForContinue);
     int figureInput();
 public:
