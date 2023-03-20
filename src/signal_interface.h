@@ -7,7 +7,7 @@
 enum FlowEnum { MAIN_MENU, MESSAGE_BAUDRATE, FIGURE_INPUT_BAUDRATE, MESSAGE_SIZE, FIGURE_INPUT_SIZE, DATA_BEING_COLLECTED,
                 UART_SELECT_PARITY, UART_SELECT_STOP_BITS, DATA_LIST, BYTE_PRESENTATION, SPI_SELECT_FORMAT, I2C_ADDRESS_MESSAGE,
                 I2C_ADDRESS_INPUT, SELECT_ROLE, I2C_ADDRESS_PRESENTATION, ANALOG_MESSAGE_FREQUENCY, ANALOG_INPUT_FREQUENCY,
-                ANALOG_SIGNAL_PRESENTATION};
+                ANALOG_SIGNAL_PRESENTATION, ANALOG_MODE_SELECT, ANALOG_EDGE_SELECT, ANALOG_TRESHOLD_MESSAGE, ANALOG_TRESHOLD_FIGURE};
 
 class SignalInterface {
 protected:
@@ -82,7 +82,7 @@ int SignalInterface::figureInput() {
 
     FigureDisplay figureDisplay = FigureDisplay();
 
-    while(nextView == FIGURE_INPUT_BAUDRATE || nextView == FIGURE_INPUT_SIZE || nextView == I2C_ADDRESS_INPUT || nextView == ANALOG_INPUT_FREQUENCY) { // definitely change it so it takes argument and not checks all posibilites
+    while(nextView == FIGURE_INPUT_BAUDRATE || nextView == FIGURE_INPUT_SIZE || nextView == I2C_ADDRESS_INPUT || nextView == ANALOG_INPUT_FREQUENCY || nextView == ANALOG_TRESHOLD_FIGURE) { // definitely change it so it takes argument and not checks all posibilites
         sleep_ms(400);
         int buttonClicked = Button::lookForCollision(buttons, OK);
         switch (buttonClicked) {

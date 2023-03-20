@@ -14,16 +14,26 @@ private:
     uint frequency;
     uint minFrequency;
     uint maxFrequency;
+    uint minTresholdInput;
+    uint maxTresholdInput;
     uint16_t* dataBuffer;
     int bufferSize;
     uint samplesPerPeriod;
-public:
+    ModeEnum mode;
+    EdgeEnum edge;
+    float triggerTreshold;
+
     void messageFrequency();
-    void mainFlow();
     void dataReceiving();
     void dataPresentation();
+    void selectMode();
+    void selectEdge();
+    void messageTreshold();
+public:
+    void mainFlow();
 
-    AnalogSignalInterface(): SignalInterface("Analog", ANALOG_MESSAGE_FREQUENCY), frequency(0), minFrequency(10), maxFrequency(10000) {}
+    AnalogSignalInterface(): SignalInterface("Analog", ANALOG_MESSAGE_FREQUENCY), frequency(0), minFrequency(10), maxFrequency(10000),
+                                mode(SINGLE), edge(RAISING), minTresholdInput(1), maxTresholdInput(32) {}
 };
 
 void AnalogSignalInterface::messageFrequency() {
@@ -63,14 +73,14 @@ void AnalogSignalInterface::dataReceiving() { // if receivers would inherit from
     Button* buttons = new Button[1];
 
     GUI_Clear(LAVENDER_WEB);
-    GUI_DisString_EN(139, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
+    GUI_DisString_EN(129, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
 
     buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
     GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
 
     GUI_DisString_EN(30, 110, "Data is being collected", &Font16, WHITE, OXFORD_BLUE);
 
-    AnalogReceiver analogReceiver(frequency);
+    AnalogReceiver analogReceiver(frequency, mode, edge, triggerTreshold);
     analogReceiver.init();
 
     sleep_ms(400);
@@ -104,6 +114,7 @@ void AnalogSignalInterface::dataPresentation() {
     Button* buttons = new Button[1];
 
     GUI_Clear(LAVENDER_WEB);
+    GUI_DisString_EN(129, 2, name.c_str(), &Font16, WHITE, OXFORD_BLUE);
     buttons[0] = (*new Button(2, 42, 2, 42, OXFORD_BLUE, CANCEL));
     GUI_DisString_EN(15, 13, "X", &Font24, WHITE, WHITE);
 
@@ -134,6 +145,136 @@ void AnalogSignalInterface::dataPresentation() {
     delete[] buttons;
 }
 
+void AnalogSignalInterface::selectMode() {
+    enum buttonEnums {CANCEL, CONTINUE, SINGLE_SWEEP, TRIGGER_MODE};
+    Button* buttons = new Button[4];
+
+    messageTemplate(buttons, CANCEL, CONTINUE);
+
+    SingleSelect** onlySelect = new SingleSelect*[2];
+    onlySelect[0] = new SingleSelect(80, 76, "single sweep", SINGLE_SWEEP);
+    onlySelect[0]->select();
+    onlySelect[1] = new SingleSelect(80, 109, "trigger mode", TRIGGER_MODE);
+
+    buttons[2] = *onlySelect[0];
+    buttons[3] = *onlySelect[1];
+
+    while(nextView != MAIN_MENU && nextView != ANALOG_EDGE_SELECT && nextView != DATA_BEING_COLLECTED) {
+        sleep_ms(400);
+        int buttonClicked = Button::lookForCollision(buttons, TRIGGER_MODE);
+
+        switch(buttonClicked) {
+            case CANCEL: {
+                puts("CANCEL");
+                nextView = MAIN_MENU;
+                break;
+            }
+            case CONTINUE: {
+                puts("CONTINUE");
+                if (mode == SINGLE) {
+                    nextView = DATA_BEING_COLLECTED;
+                } else {
+                    nextView = ANALOG_EDGE_SELECT;
+                }
+                break;
+            }
+            case SINGLE_SWEEP:
+                if (mode != SINGLE) {
+                    SingleSelect::select(onlySelect, SINGLE_SWEEP, 2);
+                    mode = SINGLE;
+                }
+                break;
+            case TRIGGER_MODE:
+                if (mode != TRIGGER) {
+                    SingleSelect::select(onlySelect, TRIGGER_MODE, 2);
+                    mode = TRIGGER;
+                }
+                break;
+        }
+    }
+    delete [] buttons;
+    delete [] onlySelect;
+}
+
+void AnalogSignalInterface::selectEdge() {
+    enum buttonEnums {CANCEL, CONTINUE, RAISING_SELECT, FALLING_SELECT};
+    Button* buttons = new Button[4];
+
+    messageTemplate(buttons, CANCEL, CONTINUE);
+
+    SingleSelect** onlySelect = new SingleSelect*[2];
+    onlySelect[0] = new SingleSelect(80, 76, "raising edge", RAISING_SELECT);
+    onlySelect[0]->select();
+    onlySelect[1] = new SingleSelect(80, 109, "falling edge", FALLING_SELECT);
+
+    buttons[2] = *onlySelect[0];
+    buttons[3] = *onlySelect[1];
+
+    while(nextView != MAIN_MENU && nextView != ANALOG_TRESHOLD_MESSAGE) {
+        sleep_ms(400);
+        int buttonClicked = Button::lookForCollision(buttons, FALLING_SELECT);
+
+        switch(buttonClicked) {
+            case CANCEL: {
+                puts("CANCEL");
+                nextView = MAIN_MENU;
+                break;
+            }
+            case CONTINUE: {
+                puts("CONTINUE");
+                nextView = ANALOG_TRESHOLD_MESSAGE;
+                break;
+            }
+            case RAISING_SELECT:
+                if (edge != RAISING) {
+                    SingleSelect::select(onlySelect, RAISING_SELECT, 2);
+                    edge = RAISING;
+                }
+                break;
+            case FALLING_SELECT:
+                if (edge != FALLING) {
+                    SingleSelect::select(onlySelect, FALLING_SELECT, 2);
+                    edge = FALLING;
+                }
+                break;
+        }
+    }
+    delete [] buttons;
+    delete [] onlySelect;
+}
+
+void AnalogSignalInterface::messageTreshold() {
+    enum buttonEnums {CANCEL, CONTINUE};
+    Button* buttons = new Button[2];
+    
+    messageTemplate(buttons, CANCEL, CONTINUE);
+
+    GUI_DisString_EN(37, 68, "Enter trigger treshold", &Font16, WHITE, BLACK);
+    GUI_DisString_EN(110, 91, "[0.1 V]!", &Font16, WHITE, PLOT_RED);
+
+    std::string min = "min: " + std::to_string(minTresholdInput);
+    std::string max = "max: " + std::to_string(maxTresholdInput);
+    GUI_DisString_EN(115, 116, min.c_str(), &Font16, WHITE, BLACK);
+    GUI_DisString_EN(115, 136, max.c_str(), &Font16, WHITE, BLACK);
+    
+    sleep_ms(400);
+    int buttonClicked = Button::lookForCollision(buttons, CONTINUE);
+
+    switch(buttonClicked) {
+        case CANCEL: {
+            puts("CANCEL");
+            nextView = MAIN_MENU;
+            break;
+        }
+        case CONTINUE: {
+            puts("CONTINUE");
+            nextView = ANALOG_TRESHOLD_FIGURE;
+            break;
+        }
+    }
+    delete[] buttons;
+}
+
 void AnalogSignalInterface::mainFlow() {
     while (true) {
         if (nextView == MAIN_MENU) break;
@@ -145,11 +286,30 @@ void AnalogSignalInterface::mainFlow() {
             case ANALOG_INPUT_FREQUENCY:
                 figure = figureInput();
                 if (figure != -1 && figure <= maxFrequency && figure >= minFrequency) {
-                    nextView = DATA_BEING_COLLECTED;
+                    nextView = ANALOG_MODE_SELECT;
                     frequency = figure;
                 }
                 else {
                     nextView = ANALOG_MESSAGE_FREQUENCY;
+                }
+                break;
+            case ANALOG_MODE_SELECT:
+                selectMode();
+                break;
+            case ANALOG_EDGE_SELECT:
+                selectEdge();
+                break;
+            case ANALOG_TRESHOLD_MESSAGE:
+                messageTreshold();
+                break;
+            case ANALOG_TRESHOLD_FIGURE:
+                figure = figureInput();
+                if (figure != -1 && figure <= maxTresholdInput && figure >= minTresholdInput) {
+                    nextView = DATA_BEING_COLLECTED;
+                    triggerTreshold = figure * 0.1;
+                }
+                else {
+                    nextView = ANALOG_TRESHOLD_MESSAGE;
                 }
                 break;
             case DATA_BEING_COLLECTED:
