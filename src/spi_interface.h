@@ -6,6 +6,12 @@
 #include "digital_signal_plot.h"
 #include "spi_receiver.h"
 
+#define MOSI_START_Y 120
+#define MOSI_IDLE_STATE 0
+#define MOSI_NUM_OF_BITS 8
+#define MOSI_HEIGHT 32
+#define MOSI_PLOT_WIDTH 32
+
 class SPIInterface : public DigitalSignalInterface {
 private:
     spi_cpol_t CPOL;
@@ -200,7 +206,8 @@ void SPIInterface::plotSCLK() {
 }
 
 void SPIInterface::plotMOSI() {
-    DigitalSignalPlot plotMOSI(120, 0, 8, 32, 32, PLOT_BLUE); // divide to 18 parts, so its easier to plot in relation to SCLK
+    DigitalSignalPlot plotMOSI(MOSI_START_Y, MOSI_IDLE_STATE, MOSI_NUM_OF_BITS, 
+                                MOSI_HEIGHT, MOSI_PLOT_WIDTH, PLOT_BLUE);
     bool* bitsFromByte = byteToBits(byteSelected);
     for (int i=7; i>=0; i--) {
         plotMOSI.drawNextBit(bitsFromByte[i], PLOT_BLUE);

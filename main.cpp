@@ -23,6 +23,6 @@ void initLcdTp() {
 	LCD_WriteData(0x60);
 	sLCD_DIS.LCD_Dis_Column	= 320;
 	sLCD_DIS.LCD_Dis_Page =  240;
-	TP_Init(SCAN_DIR_DFT); 	// this lcd_scan_dir may fuck things up
-	TP_GetAdFac();			// this may also fuck things up
+	TP_Init(SCAN_DIR_DFT);
+	TP_GetAdFac();
 }
