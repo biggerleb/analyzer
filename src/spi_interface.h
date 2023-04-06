@@ -172,7 +172,6 @@ void SPIInterface::dataPresentation() {
     }
 
     delete[] buttons;
-    // delete[] bitsFromByte;
 }
 
 void SPIInterface::plotSCLK() {

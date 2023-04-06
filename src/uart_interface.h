@@ -32,7 +32,7 @@ public:
 
 void UARTInterface::messageBaudrate() {
     enum buttonEnums {CANCEL, CONTINUE};
-    Button* buttons = new Button[2]; // remember to delete
+    Button* buttons = new Button[2];
     
     messageTemplate(buttons, CANCEL, CONTINUE);
 
@@ -122,7 +122,7 @@ void UARTInterface::selectParity() {
 
 void UARTInterface::selectStopBits() {
     enum buttonEnums {CANCEL, CONTINUE, STOP_BIT_1, STOP_BITS_2};
-    Button* buttons = new Button[4]; // remember to delete
+    Button* buttons = new Button[4];
 
     messageTemplate(buttons, CANCEL, CONTINUE);
 
@@ -266,7 +266,7 @@ bool UARTInterface::calculateParityBit(bool* bitsFromByte) {
     } else if (parity == UART_PARITY_ODD) {
         return (sum % 2 == 1) ? 1: 0;
     }
-    return false; // should never occur
+    return false;
 }
 
 void UARTInterface::mainFlow() {

@@ -49,11 +49,11 @@ void AnalogReceiver::init() {
     adc_select_input(0);
     adc_irq_set_enabled(true);
     adc_fifo_setup(
-        true,    // Write each completed conversion to the sample FIFO
-        false,  // Enable DMA data request (DREQ)
-        1,      // DREQ (and IRQ) asserted when at least 1 sample present
-        false,   // We won't see the ERR bit because of 8 bit reads; disable.
-        false     // Shift each sample to 8 bits when pushing to FIFO
+        true,    
+        false,  
+        1,      
+        false,   
+        false     
     );
     adc_set_clkdiv(calculateClkDiv());
 
@@ -122,7 +122,7 @@ void onAdcFifoSingleSweep() {
     }
 }
 
-void onAdcFifoTrigger() { // it is not ideal since half of the time trigger will get lost, kinda easy to fix though
+void onAdcFifoTrigger() { 
     while(!adc_fifo_is_empty()) {
         g_analog_buffer[g_charsRxed++] = adc_fifo_get();
         if (g_analogTriggered) {

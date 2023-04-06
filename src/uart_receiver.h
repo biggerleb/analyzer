@@ -31,22 +31,19 @@ private:
 public:
 
     void init() {
-        // gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
         gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
         uart_init(UART_ID, baudrate);
 
-        uart_set_hw_flow(UART_ID, false, false); // turn off CTS/RTS flow control
+        uart_set_hw_flow(UART_ID, false, false);
         uart_set_format(UART_ID, DATA_BITS, stopBits, parity);
         uart_set_fifo_enabled(UART_ID, true);
 
-        // And set up and enable the interrupt handlers and global buffer
         g_charsRxed = 0;
         g_bufferSize = bytesSize;
         g_buffer = new uint8_t[g_bufferSize];
         irq_set_exclusive_handler(UART0_IRQ, onUartRx);
         irq_set_enabled(UART0_IRQ, true);
 
-        // Now enable the UART to send interrupts - RX only
         uart_set_irq_enables(UART_ID, true, false);
 
         puts("UART Receiver init succeded.");
@@ -61,7 +58,6 @@ public:
     }
 
     void deInit() {
-        // g_charsRxed = 0;
 
         irq_remove_handler(UART0_IRQ, onUartRx);
         irq_set_enabled(UART0_IRQ, false);

@@ -33,7 +33,7 @@ public:
     }
 
     FigureDisplay(): figure(0), offsetX(242), y(18) {
-        GUI_DrawRectangle(66, 6, 254, 45, BLACK, DRAW_FULL, DOT_PIXEL_DFT); // border
+        GUI_DrawRectangle(66, 6, 254, 45, BLACK, DRAW_FULL, DOT_PIXEL_DFT);
         clearDisplay();
     }
 };

@@ -30,7 +30,7 @@ public:
 
 void I2CInterface::messageSlaveAddress() {
     enum buttonEnums {CANCEL, CONTINUE};
-    Button* buttons = new Button[2]; // remember to delete
+    Button* buttons = new Button[2];
     
     messageTemplate(buttons, CANCEL, CONTINUE);
 
@@ -176,7 +176,7 @@ void I2CInterface::plotSCL() {
 
 void I2CInterface::plotAddressSDA() {
     DigitalSignalPlot plotSDA(75, 1, 10, 42, 28, BLACK);
-    bool* bitsFromByte = byteToBits((uint8_t)slaveAddress); // tutaj daj adres
+    bool* bitsFromByte = byteToBits((uint8_t)slaveAddress);
     plotSDA.drawNextBit(0, PLOT_GREEN);
     for (int i=6; i>=0; i--) {
         plotSDA.drawNextBit(bitsFromByte[i], PLOT_BLUE);
@@ -246,7 +246,7 @@ void I2CInterface::dataList() {
         switch (controlButtonClicked) {
             case MAIN_MENU:
                 nextView = MAIN_MENU;
-                clearGlobalBuffer(); // to chyba do usuniecia
+                clearGlobalBuffer(); // shouldn't it be deleted?
                 break;
             case PREVIOUS:
                 listOffset -= 1;

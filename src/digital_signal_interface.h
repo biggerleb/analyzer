@@ -27,58 +27,24 @@ protected:
 
     void messageSize();
     virtual void dataList();
-    // virtual void dataReceiving();
+    virtual void dataReceiving()=0;
 
-    bool* byteToBits(uint8_t byte); // remember to delete when done working with
+    bool* byteToBits(uint8_t byte); // more of a Util method
     std::string byteToHexString(uint8_t byte);
 
-    // virtual void dataPresentation()=0;
+    virtual void dataPresentation()=0;
 public:
+    virtual void mainFlow()=0;
 
     DigitalSignalInterface(std::string name, int minSize, int maxSize, FlowEnum firstView):
         SignalInterface(name, firstView), minSize(minSize), maxSize(maxSize),
         sizeSet(0), listOffset(0), byteSelected(0) {}
 };
 
-// void DigitalSignalInterface::mainFlow() {
-//     while (true) {
-//         if (nextView == MAIN_MENU) break;
-//         int figure;
-//         switch (nextView) {
-//             case FIGURE_INPUT_BAUDRATE:
-//                 figure = figureInput();
-//                 if (figure != -1) {
-//                     nextView = MESSAGE_SIZE;
-//                     baudrateSet = figure;
-//                     printf("baudrateSet: %d", baudrateSet);
-//                 }
-//                 else {
-//                     nextView = MESSAGE_BAUDRATE;
-//                 }
-//                 break;
-//             case MESSAGE_SIZE:
-//                 messageSize();
-//                 break;
-//             case FIGURE_INPUT_SIZE:
-//                 figure = figureInput();
-//                 if (figure != -1) {
-//                     nextView = MAIN_MENU; // to change
-//                     sizeSet = figure;
-//                     printf("sizeSet: %d", sizeSet);
-//                 }
-//                 else {
-//                     nextView = MESSAGE_SIZE;
-//                 }
-//                 break;
-//             case DATA_BEING_COLLECTED:
-//                 break;
-//         }
-//     }
-// }
 
 void DigitalSignalInterface::messageSize() {
     enum buttonEnums {CANCEL, CONTINUE};
-    Button* buttons = new Button[2]; // remember to delete
+    Button* buttons = new Button[2];
     
     messageTemplate(buttons, CANCEL, CONTINUE);
 

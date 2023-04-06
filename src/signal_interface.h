@@ -37,7 +37,7 @@ void SignalInterface::messageTemplate(Button* buttons, int enumForCancel, int en
 
 int SignalInterface::figureInput() {
     enum buttonEnums {CANCEL, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9, NUM_0, CLEAR, OK};
-    Button* buttons = new Button[13]; // remember to delete
+    Button* buttons = new Button[13];
 
     GUI_Clear(LAVENDER_WEB);
 

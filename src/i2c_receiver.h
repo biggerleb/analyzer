@@ -49,7 +49,7 @@ public:
 
 void onI2CRx() {
     if (g_charsRxed < g_bufferSize) {
-        g_buffer[g_charsRxed++] = (uint8_t)i2c0_hw->data_cmd; // try without casting to uint8
+        g_buffer[g_charsRxed++] = (uint8_t)i2c0_hw->data_cmd;
     } else {
         I2CReceiver::deInit();
     }
