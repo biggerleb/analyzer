@@ -21,7 +21,6 @@ include_directories(./lib/sdcard)
 
 add_executable(main 
 main.cpp
-main_menu.cpp
 )
 
 # enable usb output, disable uart output
