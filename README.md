@@ -6,8 +6,8 @@ This project is a digital and analog signal analyzer powered by a microcontrolle
 - I2C
 - Analog
 ## Demo links
-- Capturing digital signals (LINK)
-- Acquiring anaalog signals (LINK)
+- Capturing digital signals: https://youtu.be/T8kPoXXhnqY
+- Acquiring anaalog signals https://youtu.be/MiG5dvzU6YE
 ## Hardware used
 - Raspberry Pi Pico with RP2040 microcontroller
 - Waveshare Pico Res Touch LCD 2.8
